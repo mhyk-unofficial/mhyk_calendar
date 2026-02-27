@@ -114,52 +114,78 @@
     }
 
     function renderEvents(data) {
-        const container = document.getElementById('eventList');
-        container.innerHTML = data.map(item => {
-            let sets = { gSSR: new Set(), gSR: new Set(), gR: new Set(), rSSR: new Set(), rSR: new Set(), rR: new Set(), chibi: new Set() };
-            
-            Object.keys(item).forEach(key => {
-                const ids = splitNames(item[key]).map(n => nameMap[n.trim()]).filter(id => id);
-                if (key.includes("卡池ＳＳＲ")) ids.forEach(id => sets.gSSR.add(id));
-                else if (key.includes("卡池ＳＲ")) ids.forEach(id => sets.gSR.add(id));
-                else if (key.includes("卡池Ｒ")) ids.forEach(id => sets.gR.add(id));
-                else if (key.includes("報酬ＳＳＲ")) ids.forEach(id => sets.rSSR.add(id));
-                else if (key.includes("報酬ＳＲ")) ids.forEach(id => sets.rSR.add(id));
-                else if (key.includes("報酬Ｒ")) ids.forEach(id => sets.rR.add(id));
-                else if (key.includes("四星小人")) ids.forEach(id => sets.chibi.add(id));
-                else if (key.includes("三星小人")) ids.forEach(id => sets.chibi.add(id));
-            });
-
-            const drawRow = (label, ids, colorClass, isChibi=false) => {
-                if (ids.size === 0) return '';
-                return `
-                    <div class="char-row">
-                        <span class="char-label ${colorClass}">${label}</span>
-                        <div class="char-list">
-                            ${Array.from(ids).map(id => `<img src="${IMG_BASE_URL}${id}.png" class="${isChibi?'chibi-img':'char-img'}" title="${idToJp[id]}">`).join('')}
-                        </div>
-                    </div>`;
-            };
-
-            return `
-                <div class="event-card">
-                    <div class="event-title">${item['活動名稱']}</div>
-                    <div class="event-info">
-                        <span>第 ${item['期數'] || '-'} 期 | 📅 ${item['日期'] || '-'}</span>
-                        <span>${item['天數'] || ''}</span>
-                    </div>
-                    
-                    ${drawRow('看板角色', new Set([nameMap[item['看板角色']] || 'default']), 'lbl-leader')}
-                    ${drawRow('卡池 SSR', sets.gSSR, 'lbl-ssr')}
-                    ${drawRow('卡池 SR/R', new Set([...sets.gSR, ...sets.gR]), 'lbl-sr')}
-                    ${drawRow('報酬 SSR', sets.rSSR, 'lbl-reward')}
-                    ${drawRow('報酬 SR/R', new Set([...sets.rSR, ...sets.rR]), 'lbl-reward')}
-                    
-                    ${drawRow('四星小人', sets.chibi4, 'lbl-chibi', true)}
-                    ${drawRow('三星小人', sets.chibi3, 'lbl-chibi', true)}
-                </div>`;
-        }).join('');
+    const container = document.getElementById('eventList');
+    if (!data || data.length === 0) {
+        container.innerHTML = "沒有找到匹配的活動資料。";
+        return;
     }
+
+    container.innerHTML = data.map(item => {
+        // 1. 確保所有集合都被初始化，防止出現 undefined 錯誤
+        let sets = { 
+            gSSR: new Set(), gSR: new Set(), gR: new Set(), 
+            rSSR: new Set(), rSR: new Set(), rR: new Set(), 
+            chibi4: new Set(), chibi3: new Set() 
+        };
+        
+        // 2. 掃描所有欄位
+        Object.keys(item).forEach(key => {
+            const val = item[key];
+            if (!val) return; // 跳過空儲存格
+
+            const ids = splitNames(val).map(n => nameMap[n.trim()]).filter(id => id);
+            
+            // 使用關鍵字過濾 (支援全形與半形文字)
+            const k = key.toString();
+            if (k.includes("卡池") && k.includes("SSR")) ids.forEach(id => sets.gSSR.add(id));
+            else if (k.includes("卡池") && k.includes("SR")) ids.forEach(id => sets.gSR.add(id));
+            else if (k.includes("卡池") && k.includes("R")) ids.forEach(id => sets.gR.add(id));
+            else if (k.includes("報酬") && k.includes("SSR")) ids.forEach(id => sets.rSSR.add(id));
+            else if (k.includes("報酬") && k.includes("SR")) ids.forEach(id => sets.rSR.add(id));
+            else if (k.includes("報酬") && k.includes("R")) ids.forEach(id => sets.rR.add(id));
+            else if (k.includes("四星小人")) ids.forEach(id => sets.chibi4.add(id));
+            else if (k.includes("三星小人")) ids.forEach(id => sets.chibi3.add(id));
+        });
+
+        // 定義繪製橫列的工具
+        const drawRow = (label, ids, colorClass, isChibi=false) => {
+            if (!ids || ids.size === 0) return '';
+            const imgClass = isChibi ? 'chibi-img' : 'char-img';
+            const imgs = Array.from(ids).map(id => 
+                `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/40?text=?'">`
+            ).join('');
+            
+            return `
+                <div class="char-row">
+                    <span class="char-label ${colorClass}">${label}</span>
+                    <div class="char-list">${imgs}</div>
+                </div>`;
+        };
+
+        // 取得看板角色 ID
+        const leaderName = item['看板角色'] ? item['看板角色'].trim() : '';
+        const leaderId = nameMap[leaderName];
+        const leaderRow = leaderId ? drawRow('看板角色', new Set([leaderId]), 'lbl-leader') : '';
+
+        // 3. 回傳卡片 HTML
+        return `
+            <div class="event-card">
+                <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
+                <div class="event-info">
+                    <span>第 ${item['期數'] || '-'} 期 | 📅 ${item['日期'] || '-'}</span>
+                    <span>${item['天數'] || ''}</span>
+                </div>
+                
+                ${leaderRow}
+                ${drawRow('卡池 SSR', sets.gSSR, 'lbl-ssr')}
+                ${drawRow('卡池 SR/R', new Set([...sets.gSR, ...sets.gR]), 'lbl-sr')}
+                ${drawRow('報酬 SSR', sets.rSSR, 'lbl-reward')}
+                ${drawRow('報酬 SR/R', new Set([...sets.rSR, ...sets.rR]), 'lbl-reward')}
+                ${drawRow('四星小人', sets.chibi4, 'lbl-chibi', true)}
+                ${drawRow('三星小人', sets.chibi3, 'lbl-chibi', true)}
+            </div>`;
+    }).join('');
+}
 
     function handleSearch() {
         const term = document.getElementById('searchInput').value.toLowerCase();
@@ -170,3 +196,4 @@
 </script>
 </body>
 </html>
+
