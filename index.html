@@ -68,7 +68,7 @@
         "費加洛": "Figaro", "路契爾": "Rutile", "雷諾克斯": "Lennox", "米契爾": "Mitile"
     };
 
-    const idToJp = { "Oz": "オズ", "Arthur": "アーサー", "Cain": "カイン", "Riquet": "リケ", "Snow": "スノウ", "White": "ホワイト", "Mithra": "ミスラ", "Owen": "オーエン", "Bradley": "ブラッドリー", "Faust": "ファウスト", "Shino": "シノ", "Heathcliff": "希斯克里夫", "Nero": "ネロ", "Shylock": "シャイロック", "Murr": "ムル", "Chloe": "クロエ", "Rustica": "拉斯提卡", "Figaro": "フィガロ", "Rutile": "ルチル", "Lennox": "レノックス", "Mitile": "ミチル" };
+    const idToJp = { "Oz": "オズ", "Arthur": "アーサー", "Cain": "カイン", "Riquet": "リケ", "Snow": "スノウ", "White": "ホワイト", "Mithra": "ミスラ", "Owen": "オーエン", "Bradley": "ブラッドリー", "Faust": "ファウスト", "Shino": "シノ", "Heathcliff": "ヒースクリフ", "Nero": "ネロ", "Shylock": "シャイロック", "Murr": "ムル", "Chloe": "クロエ", "Rustica": "ラスティカ", "Figaro": "フィガロ", "Rutile": "ルチル", "Lennox": "レノックス", "Mitile": "ミチル" };
 
     let allEvents = [];
 
@@ -123,8 +123,8 @@
                 <img src="${IMG_BASE_URL}${id}.png">
                 <div class="stat-name">${idToJp[id] || id}</div>
                 <div class="stat-counts">
-                    <span style="color:var(--gacha-gold)">池:${count.gacha}</span><br>
-                    <span style="color:var(--reward-blue)">賞:${count.reward}</span>
+                    <span style="color:var(--gacha-gold)">卡池SSR:${count.gacha}</span><br>
+                    <span style="color:var(--reward-blue)">報酬SSR:${count.reward}</span>
                 </div>
             </div>
         `).join('');
@@ -215,3 +215,4 @@
 </script>
 </body>
 </html>
+
