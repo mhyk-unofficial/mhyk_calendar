@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mhyk 活動資料庫</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root { 
+            --main-purple: #7d6ba1; 
+            --gacha-gold: #d4af37; 
+            --reward-blue: #5b8ad2; 
+            --bg-color: #fcf9f2; 
+        }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; color: #333; line-height: 1.5; }
+        
+        .header-section { background: #fff; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .search-bar { width: 100%; padding: 15px; font-size: 16px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; }
+        .search-bar:focus { border-color: var(--main-purple); box-shadow: 0 0 8px rgba(125, 107, 161, 0.1); }
+
+        /* 統計區塊 */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; margin-top: 15px; }
+        .stat-item { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .stat-item img { width: 45px; height: 45px; border-radius: 50%; margin-bottom: 5px; border: 1px solid #f0f0f0; background: #fafafa; }
+        .stat-name { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #444; }
+        .stat-counts { font-size: 11px; display: flex; flex-direction: column; gap: 2px; }
+        .count-gacha { color: var(--gacha-gold); font-weight: bold; }
+        .count-reward { color: var(--reward-blue); font-weight: bold; }
+
+        /* 活動卡片區 */
+        .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        .event-card { background: #fff; border-radius: 15px; padding: 20px; border-top: 6px solid var(--main-purple); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .event-title { font-size: 1.25rem; font-weight: bold; color: var(--main-purple); margin-bottom: 8px; }
+        .event-info { font-size: 13px; color: #888; margin-bottom: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #f4f4f4; padding-bottom: 10px; }
+        
+        .char-row { display: flex; align-items: center; margin-top: 10px; gap: 12px; padding: 8px; border-radius: 10px; }
+        .bg-gacha { background: #fffcf0; border: 1px solid #fdf2d0; }
+        .bg-reward { background: #f4f8ff; border: 1px solid #e1ecff; }
+        
+        .char-label { font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 5px; color: #fff; min-width: 65px; text-align: center; }
+        .lbl-leader { background: var(--main-purple); }
+        .lbl-gacha { background: var(--gacha-gold); }
+        .lbl-reward { background: var(--reward-blue); }
+
+        .char-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .char-img { width: 48px; height: 48px; border: 1px solid #ddd; border-radius: 8px; background: #fff; object-fit: cover; }
+        
+        h3 { margin: 0 0 15px 0; color: var(--main-purple); font-size: 1.3rem; border-left: 5px solid var(--main-purple); padding-left: 12px; }
+        .loading { text-align: center; padding: 50px; font-size: 18px; color: var(--main-purple); }
+    </style>
+</head>
+<body>
+
+<div class="header-section">
+    <input type="text" id="searchInput" class="search-bar" placeholder="🔍 搜尋活動名稱、角色日文名..." oninput="handleSearch()">
+    <div style="margin-top: 25px;">
+        <h3>📊 SSR 出卡次數統計</h3>
+        <div id="statsGrid" class="stats-grid">資料讀取中...</div>
+    </div>
+</div>
+
+<div id="eventList" class="event-grid">
+    <div class="loading">正在連線至 Google 試算表...</div>
+</div>
+
+<script>
+    // --- 1. 基礎配置 ---
+    // 請確保此 CSV 網址包含 gid=1107156854 (您的主活動工作表)
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT_3vvzhb6VzcCYkVqberJIlPAeLIIWhWAIP1Oix6k3ItsBTclFSBXlXUCZIUsML82QiT-E7EScRAr6/pub?gid=1107156854&single=true&output=csv'; 
+    const IMG_BASE_URL = 'https://mhyk-unofficial.github.io/mhyk_SSR_filter/mini_';
+
+    // --- 2. 角色對照表 (對應您的 gid=1685646816 表格內容) ---
+    const nameMap = {
+        "オズ": "Oz", "アーサー": "Arthur", "カイン": "Cain", "リケ": "Riquet",
+        "スノウ": "Snow", "ホワイト": "White", "ミスラ": "Mithra", "オーエン": "Owen", "ブラッドリー": "Bradley",
+        "ファウスト": "Faust", "シノ": "Shino", "ヒースクリフ": "Heathcliff", "ネロ": "Nero",
+        "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "ラスティカ": "Rustica",
+        "フィガロ": "Figaro", "ルチル": "Rutile", "レノックス": "Lennox", "ミチル": "Mitile"
+    };
+
+    let allEvents = [];
+
+    // 取得圖片網址
+    function getImgUrl(jpName) {
+        if (!jpName) return `${IMG_BASE_URL}default.png`;
+        const name = jpName.trim();
+        const enName = nameMap[name] || "default"; 
+        return `${IMG_BASE_URL}${enName}.png`;
+    }
+
+    // 分隔字串工具
+    function splitNames(str) {
+        if (!str) return [];
+        return str.split(/[,，\s/、\n]+/).filter(n => n.trim() !== "");
+    }
+
+    // --- 3. 初始化 ---
+    function init() {
+        Papa.parse(CSV_URL, {
+            download: true,
+            header: true,
+            complete: function(results) {
+                // 過濾空行
+                allEvents = results.data.filter(row => row['活動名稱'] && row['活動名稱'].trim() !== "");
+                if(allEvents.length === 0) {
+                    document.getElementById('eventList').innerHTML = "無法讀取資料，請檢查試算表發佈設定。";
+                } else {
+                    renderPage(allEvents);
+                }
+            },
+            error: function() {
+                document.getElementById('eventList').innerHTML = "連線失敗。";
+            }
+        });
+    }
+
+    function renderPage(data) {
+        renderStats(data);
+        renderEvents(data);
+    }
+
+    // --- 4. 統計邏輯 (自動處理重複標題欄位) ---
+    function renderStats(data) {
+        let stats = {};
+        Object.keys(nameMap).forEach(name => stats[name] = { gacha: 0, reward: 0 });
+
+        data.forEach(item => {
+            // 遍歷所有欄位標題
+            Object.keys(item).forEach(key => {
+                const val = item[key];
+                const names = splitNames(val);
+
+                // 只有當名字在 nameMap 裡(日文名)才統計，避開中文欄位
+                if (key.includes("卡池SSR")) {
+                    names.forEach(n => { if(stats[n]) stats[n].gacha++; });
+                } else if (key.includes("報酬SSR")) {
+                    names.forEach(n => { if(stats[n]) stats[n].reward++; });
+                }
+            });
+        });
+
+        const sorted = Object.entries(stats).sort((a, b) => (b[1].gacha + b[1].reward) - (a[1].gacha + a[1].reward));
+
+        document.getElementById('statsGrid').innerHTML = sorted.map(([jpName, count]) => `
+            <div class="stat-item">
+                <img src="${getImgUrl(jpName)}" onerror="this.src='https://via.placeholder.com/45?text=?'">
+                <div class="stat-name">${jpName}</div>
+                <div class="stat-counts">
+                    <span class="count-gacha">池:${count.gacha}</span>
+                    <span class="count-reward">賞:${count.reward}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // --- 5. 渲染活動卡片 ---
+    function renderEvents(data) {
+        const container = document.getElementById('eventList');
+        container.innerHTML = data.map(item => {
+            // 收集所有欄位中的 SSR
+            let gachaList = [];
+            let rewardList = [];
+            
+            Object.keys(item).forEach(key => {
+                const names = splitNames(item[key]);
+                // 只保留在 nameMap 裡的名字（過濾掉中文）
+                const validNames = names.filter(n => nameMap[n]);
+                
+                if (key.includes("卡池SSR")) gachaList.push(...validNames);
+                if (key.includes("報酬SSR")) rewardList.push(...validNames);
+            });
+
+            // 移除重複項
+            gachaList = [...new Set(gachaList)];
+            rewardList = [...new Set(rewardList)];
+
+            return `
+                <div class="event-card">
+                    <div class="event-title">${item['活動名稱']}</div>
+                    <div class="event-info">
+                        <span>第 ${item['期數'] || '-'} 期</span>
+                        <span>📅 ${item['日期'] || '-'} (${item['天數'] || '-'})</span>
+                    </div>
+                    
+                    <div class="char-row">
+                        <span class="char-label lbl-leader">看板角色</span>
+                        <div class="char-list">
+                            <img src="${getImgUrl(item['看板角色'])}" class="char-img" title="${item['看板角色']}">
+                            <span style="font-size:13px; color:#555">${item['看板角色'] || ''}</span>
+                        </div>
+                    </div>
+
+                    ${gachaList.length > 0 ? `
+                    <div class="char-row bg-gacha">
+                        <span class="char-label lbl-gacha">卡池 SSR</span>
+                        <div class="char-list">
+                            ${gachaList.map(n => `<img src="${getImgUrl(n)}" class="char-img" title="${n}">`).join('')}
+                        </div>
+                    </div>` : ''}
+
+                    ${rewardList.length > 0 ? `
+                    <div class="char-row bg-reward">
+                        <span class="char-label lbl-reward">報酬 SSR</span>
+                        <div class="char-list">
+                            ${rewardList.map(n => `<img src="${getImgUrl(n)}" class="char-img" title="${n}">`).join('')}
+                        </div>
+                    </div>` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    // --- 6. 搜尋邏輯 ---
+    function handleSearch() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allEvents.filter(ev => 
+            (ev['活動名稱'] || "").toLowerCase().includes(term) || 
+            (ev['看板角色'] || "").toLowerCase().includes(term) ||
+            (ev['卡池SSR'] || "").toLowerCase().includes(term)
+        );
+        renderPage(filtered);
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
