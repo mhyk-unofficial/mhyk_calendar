@@ -28,7 +28,7 @@
         .lbl-leader { background: var(--main-purple); }
         .lbl-ssr { background: var(--gacha-gold); }
         .lbl-sr { background: var(--sr-silver); }
-        .lbl-r { background: var(--r-bronze); }
+        .lbl-r { background: var(--r-bronze); } /* R卡專用銅色 */
         .lbl-reward { background: var(--reward-blue); }
         .lbl-chibi { background: #666; }
 
@@ -50,14 +50,16 @@
 <div id="eventList" class="event-grid">載入中...</div>
 
 <script>
+    // 試算表 CSV 連結與圖片來源
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT_3vvzhb6VzcCYkVqberJIlPAeLIIWhWAIP1Oix6k3ItsBTclFSBXlXUCZIUsML82QiT-E7EScRAr6/pub?gid=1107156854&single=true&output=csv';
     const IMG_BASE_URL = 'https://mhyk-unofficial.github.io/mhyk_SSR_filter/mini_';
 
+    // 角色中日對照表
     const nameMap = {
         "オズ": "Oz", "アーサー": "Arthur", "カイン": "Cain", "リケ": "Riquet",
         "スノウ": "Snow", "ホワイト": "White", "ミスラ": "Mithra", "オーエン": "Owen", "ブラッドリー": "Bradley",
         "ファウスト": "Faust", "シノ": "Shino", "ヒースクリフ": "Heathcliff", "ネロ": "Nero",
-        "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "拉斯提卡": "Rustica",
+        "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "ラスティカ": "Rustica",
         "フィガロ": "Figaro", "ルチル": "Rutile", "レノックス": "Lennox", "ミチル": "Mitile",
         "奧茲": "Oz", "亞瑟": "Arthur", "凱因": "Cain", "利凱": "Riquet",
         "思諾": "Snow", "懷特": "White", "密斯拉": "Mithra", "歐文": "Owen", "布拉德利": "Bradley",
@@ -66,10 +68,11 @@
         "費加洛": "Figaro", "路契爾": "Rutile", "雷諾克斯": "Lennox", "米契爾": "Mitile"
     };
 
-    const idToJp = { "Oz": "オズ", "Arthur": "アーサー", "Cain": "カイン", "Riquet": "リケ", "Snow": "スノウ", "White": "ホワイト", "Mithra": "ミスラ", "Owen": "オーエン", "Bradley": "ブラッドリー", "Faust": "ファウスト", "Shino": "シノ", "Heathcliff": "ヒースクリフ", "Nero": "ネロ", "Shylock": "シャイロック", "Murr": "ムル", "Chloe": "クロエ", "Rustica": "拉斯提卡", "Figaro": "フィガロ", "Rutile": "ルチル", "Lennox": "レノックス", "Mitile": "ミチル" };
+    const idToJp = { "Oz": "オズ", "Arthur": "アーサー", "Cain": "カイン", "Riquet": "リケ", "Snow": "スノウ", "White": "ホワイト", "Mithra": "ミスラ", "Owen": "オーエン", "Bradley": "ブラッドリー", "Faust": "ファウスト", "Shino": "シノ", "Heathcliff": "希斯克里夫", "Nero": "ネロ", "Shylock": "シャイロック", "Murr": "ムル", "Chloe": "クロエ", "Rustica": "拉斯提卡", "Figaro": "フィガロ", "Rutile": "ルチル", "Lennox": "レノックス", "Mitile": "ミチル" };
 
     let allEvents = [];
 
+    // 分隔字串工具
     function splitNames(str) {
         if (!str) return [];
         return str.split(/[,，\s/、\n]+/).filter(n => n.trim() !== "");
@@ -79,6 +82,7 @@
         Papa.parse(CSV_URL, {
             download: true, header: true,
             complete: function(results) {
+                // 過濾掉空行
                 allEvents = results.data.filter(row => row['活動名稱']);
                 renderPage(allEvents);
             }
@@ -90,22 +94,34 @@
         renderEvents(data);
     }
 
+    // SSR 統計邏輯
     function renderStats(data) {
         let stats = {};
-        Object.values(nameMap).forEach(id => stats[id] = { gacha: 0, reward: 0 });
-        data.forEach(item => {
-            // 直接由合併後的欄位統計 SSR
-            const gachas = splitNames(item['卡池ＳＳＲ'] || item['卡池SSR']);
-            const rewards = splitNames(item['報酬ＳＳＲ'] || item['報酬SSR']);
-            
-            gachas.forEach(n => { const id = nameMap[n.trim()]; if(id) stats[id].gacha++; });
-            rewards.forEach(n => { const id = nameMap[n.trim()]; if(id) stats[id].reward++; });
+        Object.values(nameMap).forEach(id => {
+            if (!stats[id]) stats[id] = { gacha: 0, reward: 0 };
         });
+
+        data.forEach(item => {
+            // 注意：這裡必須與你試算表合併後的標題名稱完全一致（半形）
+            const gachas = splitNames(item['卡池SSR']);
+            const rewards = splitNames(item['報酬SSR']);
+            
+            gachas.forEach(n => {
+                const id = nameMap[n.trim()];
+                if (id) stats[id].gacha++;
+            });
+            rewards.forEach(n => {
+                const id = nameMap[n.trim()];
+                if (id) stats[id].reward++;
+            });
+        });
+
         const sorted = Object.entries(stats).sort((a, b) => (b[1].gacha + b[1].reward) - (a[1].gacha + a[1].reward));
+
         document.getElementById('statsGrid').innerHTML = sorted.map(([id, count]) => `
             <div class="stat-item">
                 <img src="${IMG_BASE_URL}${id}.png">
-                <div class="stat-name">${idToJp[id]}</div>
+                <div class="stat-name">${idToJp[id] || id}</div>
                 <div class="stat-counts">
                     <span style="color:var(--gacha-gold)">池:${count.gacha}</span><br>
                     <span style="color:var(--reward-blue)">賞:${count.reward}</span>
@@ -114,43 +130,53 @@
         `).join('');
     }
 
+    // 活動列表渲染邏輯
     function renderEvents(data) {
         const container = document.getElementById('eventList');
         if (!data || data.length === 0) {
-            container.innerHTML = "沒有找到匹配的活動資料。";
+            container.innerHTML = "沒有找到匹配的資料。";
             return;
         }
 
         container.innerHTML = data.map(item => {
-            // 工具：取得該欄位的 ID Set
-            const getIds = (fName) => new Set(splitNames(item[fName]).map(n => nameMap[n.trim()]).filter(id => id));
+            // 工具：取得該欄位的 ID 集合 (Set 可自動去重)
+            const getIds = (fieldName) => {
+                const val = item[fieldName];
+                if (!val) return new Set();
+                return new Set(splitNames(val).map(n => nameMap[n.trim()]).filter(id => id));
+            };
 
+            // 分別抓取所有半形標題欄位
             const sets = {
-                gSSR: getIds('卡池ＳＳＲ'),
-                gSR:  getIds('卡池ＳＲ'),
-                gR:   getIds('卡池Ｒ'),
-                rSSR: getIds('報酬ＳＳＲ'),
-                rSR:  getIds('報酬ＳＲ'),
-                rR:   getIds('報酬Ｒ'),
+                gSSR: getIds('卡池SSR'),
+                gSR:  getIds('卡池SR'),
+                gR:   getIds('卡池R'),
+                rSSR: getIds('報酬SSR'),
+                rSR:  getIds('報酬SR'),
+                rR:   getIds('報酬R'),
                 chibi4: getIds('四星小人'),
                 chibi3: getIds('三星小人')
             };
 
-            const drawRow = (label, ids, colorClass, isChibi=false) => {
+            // 繪製單行角色的工具
+            const drawRow = (label, ids, colorClass, isChibi = false) => {
                 if (!ids || ids.size === 0) return '';
                 const imgClass = isChibi ? 'chibi-img' : 'char-img';
+                const imgs = Array.from(ids).map(id => 
+                    `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/40?text=?'">`
+                ).join('');
+                
                 return `
                     <div class="char-row">
                         <span class="char-label ${colorClass}">${label}</span>
-                        <div class="char-list">
-                            ${Array.from(ids).map(id => `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/40?text=?'">`).join('')}
-                        </div>
+                        <div class="char-list">${imgs}</div>
                     </div>`;
             };
 
-            const leaderId = nameMap[(item['看板角色'] || '').trim()];
-            const combinedGachaSR = new Set([...sets.gSR, ...sets.gR]);
-            const combinedRewardSR = new Set([...sets.rSR, ...sets.rR]);
+            // 處理看板角色
+            const leaderName = (item['看板角色'] || '').trim();
+            const leaderId = nameMap[leaderName];
+            const leaderRow = leaderId ? drawRow('看板角色', new Set([leaderId]), 'lbl-leader') : '';
 
             return `
                 <div class="event-card">
@@ -159,22 +185,32 @@
                         <span>第 ${item['期數'] || '-'} 期 | 📅 ${item['日期'] || '-'}</span>
                         <span>${item['天數'] || ''}</span>
                     </div>
-                    ${leaderId ? drawRow('看板角色', new Set([leaderId]), 'lbl-leader') : ''}
-                    ${drawRow('卡池 SSR', sets.gSSR, 'lbl-ssr')}
-                    ${drawRow('卡池 SR/R', combinedGachaSR, 'lbl-sr')}
-                    ${drawRow('報酬 SSR', sets.rSSR, 'lbl-reward')}
-                    ${drawRow('報酬 SR/R', combinedRewardSR, 'lbl-reward')}
+                    
+                    ${leaderRow}
+                    
+                    ${drawRow('卡池SSR', sets.gSSR, 'lbl-ssr')}
+                    ${drawRow('卡池SR', sets.gSR, 'lbl-sr')}
+                    ${drawRow('卡池R', sets.gR, 'lbl-r')}
+                    
+                    ${drawRow('報酬SSR', sets.rSSR, 'lbl-reward')}
+                    ${drawRow('報酬SR', sets.rSR, 'lbl-reward')}
+                    ${drawRow('報酬R', sets.rR, 'lbl-reward')}
+                    
                     ${drawRow('四星小人', sets.chibi4, 'lbl-chibi', true)}
                     ${drawRow('三星小人', sets.chibi3, 'lbl-chibi', true)}
                 </div>`;
         }).join('');
     }
 
+    // 搜尋功能
     function handleSearch() {
         const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = allEvents.filter(ev => Object.values(ev).some(v => v.toLowerCase().includes(term)));
+        const filtered = allEvents.filter(ev => 
+            Object.values(ev).some(v => v.toString().toLowerCase().includes(term))
+        );
         renderPage(filtered);
     }
+
     window.onload = init;
 </script>
 </body>
