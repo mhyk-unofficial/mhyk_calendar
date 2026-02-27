@@ -54,14 +54,11 @@
     const IMG_BASE_URL = 'https://mhyk-unofficial.github.io/mhyk_SSR_filter/mini_';
 
     const nameMap = {
-        // 日文對照
         "オズ": "Oz", "アーサー": "Arthur", "カイン": "Cain", "リケ": "Riquet",
         "スノウ": "Snow", "ホワイト": "White", "ミスラ": "Mithra", "オーエン": "Owen", "ブラッドリー": "Bradley",
         "ファウスト": "Faust", "シノ": "Shino", "ヒースクリフ": "Heathcliff", "ネロ": "Nero",
-        "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "ラスティカ": "Rustica",
+        "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "拉斯提卡": "Rustica",
         "フィガロ": "Figaro", "ルチル": "Rutile", "レノックス": "Lennox", "ミチル": "Mitile",
-
-        // 中文對照 (請根據你試算表實際填寫的字為準)
         "奧茲": "Oz", "亞瑟": "Arthur", "凱因": "Cain", "利凱": "Riquet",
         "思諾": "Snow", "懷特": "White", "密斯拉": "Mithra", "歐文": "Owen", "布拉德利": "Bradley",
         "浮士德": "Faust", "西諾": "Shino", "希斯克里夫": "Heathcliff", "尼洛": "Nero",
@@ -69,7 +66,7 @@
         "費加洛": "Figaro", "路契爾": "Rutile", "雷諾克斯": "Lennox", "米契爾": "Mitile"
     };
 
-    const idToJp = { "Oz": "オズ", "Arthur": "アーサー", "Cain": "カイン", "Riquet": "リケ", "Snow": "スノウ", "White": "ホワイト", "Mithra": "ミスラ", "Owen": "オーエン", "Bradley": "ブラッドリー", "Faust": "ファウスト", "Shino": "シノ", "Heathcliff": "ヒースクリフ", "Nero": "ネロ", "Shylock": "シャイロック", "Murr": "ムル", "Chloe": "クロエ", "Rustica": "ラスティカ", "Figaro": "フィガロ", "Rutile": "ルチル", "Lennox": "レノックス", "Mitile": "ミチル" };
+    const idToJp = { "Oz": "オズ", "Arthur": "アーサー", "Cain": "カイン", "Riquet": "リケ", "Snow": "スノウ", "White": "ホワイト", "Mithra": "ミスラ", "Owen": "オーエン", "Bradley": "ブラッドリー", "Faust": "ファウスト", "Shino": "シノ", "Heathcliff": "ヒースクリフ", "Nero": "ネロ", "Shylock": "シャイロック", "Murr": "ムル", "Chloe": "クロエ", "Rustica": "拉斯提卡", "Figaro": "フィガロ", "Rutile": "ルチル", "Lennox": "レノックス", "Mitile": "ミチル" };
 
     let allEvents = [];
 
@@ -93,91 +90,85 @@
         renderEvents(data);
     }
 
-    function renderEvents(data) {
-    const container = document.getElementById('eventList');
-    if (!data || data.length === 0) {
-        container.innerHTML = "沒有找到匹配的活動資料。";
-        return;
+    function renderStats(data) {
+        let stats = {};
+        Object.values(nameMap).forEach(id => stats[id] = { gacha: 0, reward: 0 });
+        data.forEach(item => {
+            // 直接由合併後的欄位統計 SSR
+            const gachas = splitNames(item['卡池ＳＳＲ'] || item['卡池SSR']);
+            const rewards = splitNames(item['報酬ＳＳＲ'] || item['報酬SSR']);
+            
+            gachas.forEach(n => { const id = nameMap[n.trim()]; if(id) stats[id].gacha++; });
+            rewards.forEach(n => { const id = nameMap[n.trim()]; if(id) stats[id].reward++; });
+        });
+        const sorted = Object.entries(stats).sort((a, b) => (b[1].gacha + b[1].reward) - (a[1].gacha + a[1].reward));
+        document.getElementById('statsGrid').innerHTML = sorted.map(([id, count]) => `
+            <div class="stat-item">
+                <img src="${IMG_BASE_URL}${id}.png">
+                <div class="stat-name">${idToJp[id]}</div>
+                <div class="stat-counts">
+                    <span style="color:var(--gacha-gold)">池:${count.gacha}</span><br>
+                    <span style="color:var(--reward-blue)">賞:${count.reward}</span>
+                </div>
+            </div>
+        `).join('');
     }
 
-    container.innerHTML = data.map(item => {
-        // 1. 初始化所有分類，給予預設空的 Set，防止出現 undefined
-        let sets = { 
-            gSSR: new Set(), gSR: new Set(), gR: new Set(), 
-            rSSR: new Set(), rSR: new Set(), rR: new Set(), 
-            chibi4: new Set(), chibi3: new Set() 
-        };
-        
-        // 2. 遍歷試算表每一欄
-        Object.keys(item).forEach(key => {
-            const val = item[key];
-            if (!val) return;
+    function renderEvents(data) {
+        const container = document.getElementById('eventList');
+        if (!data || data.length === 0) {
+            container.innerHTML = "沒有找到匹配的活動資料。";
+            return;
+        }
 
-            // 取得該格內的所有角色 ID
-            const ids = splitNames(val).map(n => nameMap[n.trim()]).filter(id => id);
-            const k = key.toString();
+        container.innerHTML = data.map(item => {
+            // 工具：取得該欄位的 ID Set
+            const getIds = (fName) => new Set(splitNames(item[fName]).map(n => nameMap[n.trim()]).filter(id => id));
 
-            // 智慧判定欄位 (不管全形半形)
-            if (k.includes("卡池")) {
-                if (k.includes("ＳＳＲ") || k.includes("SSR")) ids.forEach(id => sets.gSSR.add(id));
-                else if (k.includes("ＳＲ") || k.includes("SR")) ids.forEach(id => sets.gSR.add(id));
-                else if (k.includes("Ｒ") || k.includes("R")) ids.forEach(id => sets.gR.add(id));
-            } else if (k.includes("報酬")) {
-                if (k.includes("ＳＳＲ") || k.includes("SSR")) ids.forEach(id => sets.rSSR.add(id));
-                else if (k.includes("ＳＲ") || k.includes("SR")) ids.forEach(id => sets.rSR.add(id));
-                else if (k.includes("Ｒ") || k.includes("R")) ids.forEach(id => sets.rR.add(id));
-            } else if (k.includes("四星小人")) {
-                ids.forEach(id => sets.chibi4.add(id));
-            } else if (k.includes("三星小人")) {
-                ids.forEach(id => sets.chibi3.add(id));
-            }
-        });
+            const sets = {
+                gSSR: getIds('卡池ＳＳＲ'),
+                gSR:  getIds('卡池ＳＲ'),
+                gR:   getIds('卡池Ｒ'),
+                rSSR: getIds('報酬ＳＳＲ'),
+                rSR:  getIds('報酬ＳＲ'),
+                rR:   getIds('報酬Ｒ'),
+                chibi4: getIds('四星小人'),
+                chibi3: getIds('三星小人')
+            };
 
-        // --- 核心修正：防禦型 drawRow 函式 ---
-        const drawRow = (label, ids, colorClass, isChibi=false) => {
-            // 這裡增加了防錯檢查：如果 ids 不存在或是根本不是一個 Set，直接不顯示
-            if (!ids || !(ids instanceof Set) || ids.size === 0) return '';
-            
-            const imgClass = isChibi ? 'chibi-img' : 'char-img';
-            const imgs = Array.from(ids).map(id => 
-                `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/40?text=?'">`
-            ).join('');
-            
+            const drawRow = (label, ids, colorClass, isChibi=false) => {
+                if (!ids || ids.size === 0) return '';
+                const imgClass = isChibi ? 'chibi-img' : 'char-img';
+                return `
+                    <div class="char-row">
+                        <span class="char-label ${colorClass}">${label}</span>
+                        <div class="char-list">
+                            ${Array.from(ids).map(id => `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/40?text=?'">`).join('')}
+                        </div>
+                    </div>`;
+            };
+
+            const leaderId = nameMap[(item['看板角色'] || '').trim()];
+            const combinedGachaSR = new Set([...sets.gSR, ...sets.gR]);
+            const combinedRewardSR = new Set([...sets.rSR, ...sets.rR]);
+
             return `
-                <div class="char-row">
-                    <span class="char-label ${colorClass}">${label}</span>
-                    <div class="char-list">${imgs}</div>
+                <div class="event-card">
+                    <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
+                    <div class="event-info">
+                        <span>第 ${item['期數'] || '-'} 期 | 📅 ${item['日期'] || '-'}</span>
+                        <span>${item['天數'] || ''}</span>
+                    </div>
+                    ${leaderId ? drawRow('看板角色', new Set([leaderId]), 'lbl-leader') : ''}
+                    ${drawRow('卡池 SSR', sets.gSSR, 'lbl-ssr')}
+                    ${drawRow('卡池 SR/R', combinedGachaSR, 'lbl-sr')}
+                    ${drawRow('報酬 SSR', sets.rSSR, 'lbl-reward')}
+                    ${drawRow('報酬 SR/R', combinedRewardSR, 'lbl-reward')}
+                    ${drawRow('四星小人', sets.chibi4, 'lbl-chibi', true)}
+                    ${drawRow('三星小人', sets.chibi3, 'lbl-chibi', true)}
                 </div>`;
-        };
-
-        // 安全取得看板角色
-        const leaderName = item['看板角色'] ? item['看板角色'].trim() : '';
-        const leaderId = nameMap[leaderName];
-        const leaderRow = leaderId ? drawRow('看板角色', new Set([leaderId]), 'lbl-leader') : '';
-
-        // 合併 SR 與 R 的集合，並確保傳入的是有效的 Set
-        const combinedGachaSR = new Set([...(sets.gSR || []), ...(sets.gR || [])]);
-        const combinedRewardSR = new Set([...(sets.rSR || []), ...(sets.rR || [])]);
-
-        // 3. 組裝卡片
-        return `
-            <div class="event-card">
-                <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
-                <div class="event-info">
-                    <span>第 ${item['期數'] || '-'} 期 | 📅 ${item['日期'] || '-'}</span>
-                    <span>${item['天數'] || ''}</span>
-                </div>
-                
-                ${leaderRow}
-                ${drawRow('卡池 SSR', sets.gSSR, 'lbl-ssr')}
-                ${drawRow('卡池 SR/R', combinedGachaSR, 'lbl-sr')}
-                ${drawRow('報酬 SSR', sets.rSSR, 'lbl-reward')}
-                ${drawRow('報酬 SR/R', combinedRewardSR, 'lbl-reward')}
-                ${drawRow('四星小人', sets.chibi4, 'lbl-chibi', true)}
-                ${drawRow('三星小人', sets.chibi3, 'lbl-chibi', true)}
-            </div>`;
-    }).join('');
-}
+        }).join('');
+    }
 
     function handleSearch() {
         const term = document.getElementById('searchInput').value.toLowerCase();
@@ -188,5 +179,3 @@
 </script>
 </body>
 </html>
-
-
