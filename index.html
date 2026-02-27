@@ -93,26 +93,6 @@
         renderEvents(data);
     }
 
-    function renderStats(data) {
-        let stats = {};
-        Object.values(nameMap).forEach(id => stats[id] = { gacha: 0, reward: 0 });
-        data.forEach(item => {
-            Object.keys(item).forEach(key => {
-                const names = [...new Set(splitNames(item[key]).map(n => nameMap[n.trim()]).filter(id => id))];
-                if (key.includes("卡池ＳＳＲ")) names.forEach(id => stats[id].gacha++);
-                else if (key.includes("報酬ＳＳＲ")) names.forEach(id => stats[id].reward++);
-            });
-        });
-        const sorted = Object.entries(stats).sort((a, b) => (b[1].gacha + b[1].reward) - (a[1].gacha + a[1].reward));
-        document.getElementById('statsGrid').innerHTML = sorted.map(([id, count]) => `
-            <div class="stat-item">
-                <img src="${IMG_BASE_URL}${id}.png">
-                <div class="stat-name">${idToJp[id]}</div>
-                <div class="stat-counts"><span style="color:var(--gacha-gold)">卡池:${count.gacha}</span><br><span style="color:var(--reward-blue)">報酬:${count.reward}</span></div>
-            </div>
-        `).join('');
-    }
-
     function renderEvents(data) {
     const container = document.getElementById('eventList');
     if (!data || data.length === 0) {
@@ -121,35 +101,43 @@
     }
 
     container.innerHTML = data.map(item => {
-        // 1. 確保所有集合都被初始化，防止出現 undefined 錯誤
+        // 1. 初始化所有分類，給予預設空的 Set，防止出現 undefined
         let sets = { 
             gSSR: new Set(), gSR: new Set(), gR: new Set(), 
             rSSR: new Set(), rSR: new Set(), rR: new Set(), 
             chibi4: new Set(), chibi3: new Set() 
         };
         
-        // 2. 掃描所有欄位
+        // 2. 遍歷試算表每一欄
         Object.keys(item).forEach(key => {
             const val = item[key];
-            if (!val) return; // 跳過空儲存格
+            if (!val) return;
 
+            // 取得該格內的所有角色 ID
             const ids = splitNames(val).map(n => nameMap[n.trim()]).filter(id => id);
-            
-            // 使用關鍵字過濾 (支援全形與半形文字)
             const k = key.toString();
-            if (k.includes("卡池") && k.includes("SSR")) ids.forEach(id => sets.gSSR.add(id));
-            else if (k.includes("卡池") && k.includes("SR")) ids.forEach(id => sets.gSR.add(id));
-            else if (k.includes("卡池") && k.includes("R")) ids.forEach(id => sets.gR.add(id));
-            else if (k.includes("報酬") && k.includes("SSR")) ids.forEach(id => sets.rSSR.add(id));
-            else if (k.includes("報酬") && k.includes("SR")) ids.forEach(id => sets.rSR.add(id));
-            else if (k.includes("報酬") && k.includes("R")) ids.forEach(id => sets.rR.add(id));
-            else if (k.includes("四星小人")) ids.forEach(id => sets.chibi4.add(id));
-            else if (k.includes("三星小人")) ids.forEach(id => sets.chibi3.add(id));
+
+            // 智慧判定欄位 (不管全形半形)
+            if (k.includes("卡池")) {
+                if (k.includes("ＳＳＲ") || k.includes("SSR")) ids.forEach(id => sets.gSSR.add(id));
+                else if (k.includes("ＳＲ") || k.includes("SR")) ids.forEach(id => sets.gSR.add(id));
+                else if (k.includes("Ｒ") || k.includes("R")) ids.forEach(id => sets.gR.add(id));
+            } else if (k.includes("報酬")) {
+                if (k.includes("ＳＳＲ") || k.includes("SSR")) ids.forEach(id => sets.rSSR.add(id));
+                else if (k.includes("ＳＲ") || k.includes("SR")) ids.forEach(id => sets.rSR.add(id));
+                else if (k.includes("Ｒ") || k.includes("R")) ids.forEach(id => sets.rR.add(id));
+            } else if (k.includes("四星小人")) {
+                ids.forEach(id => sets.chibi4.add(id));
+            } else if (k.includes("三星小人")) {
+                ids.forEach(id => sets.chibi3.add(id));
+            }
         });
 
-        // 定義繪製橫列的工具
+        // --- 核心修正：防禦型 drawRow 函式 ---
         const drawRow = (label, ids, colorClass, isChibi=false) => {
-            if (!ids || ids.size === 0) return '';
+            // 這裡增加了防錯檢查：如果 ids 不存在或是根本不是一個 Set，直接不顯示
+            if (!ids || !(ids instanceof Set) || ids.size === 0) return '';
+            
             const imgClass = isChibi ? 'chibi-img' : 'char-img';
             const imgs = Array.from(ids).map(id => 
                 `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/40?text=?'">`
@@ -162,12 +150,16 @@
                 </div>`;
         };
 
-        // 取得看板角色 ID
+        // 安全取得看板角色
         const leaderName = item['看板角色'] ? item['看板角色'].trim() : '';
         const leaderId = nameMap[leaderName];
         const leaderRow = leaderId ? drawRow('看板角色', new Set([leaderId]), 'lbl-leader') : '';
 
-        // 3. 回傳卡片 HTML
+        // 合併 SR 與 R 的集合，並確保傳入的是有效的 Set
+        const combinedGachaSR = new Set([...(sets.gSR || []), ...(sets.gR || [])]);
+        const combinedRewardSR = new Set([...(sets.rSR || []), ...(sets.rR || [])]);
+
+        // 3. 組裝卡片
         return `
             <div class="event-card">
                 <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
@@ -178,9 +170,9 @@
                 
                 ${leaderRow}
                 ${drawRow('卡池 SSR', sets.gSSR, 'lbl-ssr')}
-                ${drawRow('卡池 SR/R', new Set([...sets.gSR, ...sets.gR]), 'lbl-sr')}
+                ${drawRow('卡池 SR/R', combinedGachaSR, 'lbl-sr')}
                 ${drawRow('報酬 SSR', sets.rSSR, 'lbl-reward')}
-                ${drawRow('報酬 SR/R', new Set([...sets.rSR, ...sets.rR]), 'lbl-reward')}
+                ${drawRow('報酬 SR/R', combinedRewardSR, 'lbl-reward')}
                 ${drawRow('四星小人', sets.chibi4, 'lbl-chibi', true)}
                 ${drawRow('三星小人', sets.chibi3, 'lbl-chibi', true)}
             </div>`;
@@ -196,4 +188,5 @@
 </script>
 </body>
 </html>
+
 
