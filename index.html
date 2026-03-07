@@ -10,55 +10,58 @@
         --main-purple: #7d6ba1; --gacha-gold: #d4af37; --reward-blue: #5b8ad2; 
         --sr-silver: #a0a0a0; --r-bronze: #cd7f32; --bg-color: #fcf9f2; 
     }
-    body { font-family: "PingFang TC", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; }
+    body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; }
     
     .header-section { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    
-    /* 統計區保持不變，或可稍微縮小 */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 15px; }
-    .stat-item { background: #fff; border-radius: 8px; padding: 5px; text-align: center; border: 1px solid #eee; font-size: 10px; }
-    .stat-item img { width: 30px; height: 30px; border-radius: 50%; }
+    .search-bar { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; }
 
-    /* 修改為單欄橫式 */
-    .event-grid { display: flex; flex-direction: column; gap: 10px; }
+    /* 統計區 */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px; }
+    .stat-item { background: #fff; border-radius: 10px; padding: 10px; text-align: center; border: 1px solid #eee; }
+    .stat-item img { width: 45px; height: 45px; border-radius: 50%; margin-bottom: 5px; }
+
+    /* 強制單行排版容器 */
+    .event-grid { display: flex; flex-direction: column; gap: 12px; min-width: 1200px; /* 確保內容不擠壓 */ }
     
     .event-card { 
-        background: #fff; border-radius: 8px; padding: 10px 15px; 
-        border-left: 5px solid var(--main-purple); /* 改為左邊條 */
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        display: flex; align-items: center; gap: 20px; /* 橫向排列 */
+        background: #fff; border-radius: 10px; padding: 12px 20px; 
+        border-left: 6px solid var(--main-purple);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        display: flex; align-items: center; /* 垂直居中 */
+        flex-wrap: nowrap; /* 強制不換行 */
+        gap: 25px;
     }
 
     /* 左側：期數與日期 */
-    .event-time-box { min-width: 100px; text-align: center; border-right: 1px solid #eee; padding-right: 15px; }
-    .event-period { font-size: 12px; color: var(--main-purple); font-weight: bold; }
-    .event-date { font-size: 10px; color: #999; }
+    .event-time-box { min-width: 130px; border-right: 2px solid #f0f0f0; padding-right: 15px; text-align: center; flex-shrink: 0; }
+    .event-period { font-size: 16px; color: var(--main-purple); font-weight: bold; margin-bottom: 4px; }
+    .event-date { font-size: 12px; color: #888; white-space: nowrap; }
 
-    /* 中間：名稱與看板 */
-    .event-main-box { flex: 1; min-width: 200px; }
-    .event-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
+    /* 中間：活動名稱與看板 */
+    .event-main-box { min-width: 250px; flex-shrink: 0; display: flex; align-items: center; gap: 15px; }
+    .event-title { font-size: 1.3rem; font-weight: 900; color: #333; line-height: 1.2; }
+    .leader-box { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .leader-label { font-size: 10px; font-weight: bold; color: var(--main-purple); }
+
+    /* 右側：所有卡組（橫向一條龍） */
+    .event-chars-box { 
+        display: flex; flex-direction: row; align-items: center; gap: 15px; 
+        flex-grow: 1; overflow-x: auto; /* 若螢幕不夠長可左右滑動 */
+        padding: 5px 0;
+    }
+
+    /* 單組角色樣式 */
+    .char-group { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 8px; background: #f8f8f8; flex-shrink: 0; }
+    .char-label { font-size: 11px; font-weight: bold; color: #666; white-space: nowrap; border-bottom: 2px solid #ddd; }
     
-    /* 右側：角色組區塊 */
-    .event-chars-box { flex: 2; display: flex; flex-direction: column; gap: 5px; }
+    /* 圖片放大 */
+    .char-list { display: flex; gap: 4px; }
+    .char-img { width: 48px; height: 48px; border-radius: 6px; border: 1px solid #ddd; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
+    .chibi-img { width: 40px; height: 40px; border-radius: 5px; }
 
-    /* 角色列：讓標籤與圖片更緊湊 */
-    .char-row-wrapper { 
-        display: flex; align-items: center; gap: 10px; 
-        padding: 4px 8px; border-radius: 6px; background: #fafafa;
-    }
-    .char-group { display: flex; align-items: center; gap: 5px; }
-    .char-label { font-size: 9px; padding: 1px 4px; min-width: 40px; }
-    .char-list img { width: 32px; height: 32px; border-radius: 4px; }
-    .chibi-img { width: 28px; height: 28px; }
-
-    /* 搜尋框 */
-    .search-bar { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; }
-
-    /* 手機版自動切換回垂直排版 */
-    @media (max-width: 768px) {
-        .event-card { flex-direction: column; align-items: flex-start; gap: 10px; border-left: none; border-top: 5px solid var(--main-purple); }
-        .event-time-box { border-right: none; text-align: left; padding: 0; }
-    }
+    /* 針對不同等級的標籤微調顏色 */
+    .lbl-ssr { color: var(--gacha-gold); border-bottom-color: var(--gacha-gold); }
+    .lbl-reward { color: var(--reward-blue); border-bottom-color: var(--reward-blue); }
 </style>
 </head>
 <body>
@@ -167,19 +170,14 @@
         }
 
         container.innerHTML = data.map(item => {
-            // 工具：自動模糊比對欄位名稱並取值
             const findValue = (keyword) => {
                 const target = keyword.toUpperCase();
-                const key = Object.keys(item).find(k => {
-                    const normalizedK = k.toString().toUpperCase().replace(/\s+/g, '');
-                    return normalizedK.includes(target);
-                });
+                const key = Object.keys(item).find(k => k.toString().toUpperCase().replace(/\s+/g, '').includes(target));
                 return item[key] || "";
             };
 
             const getIdsFromVal = (val) => new Set(splitNames(val).map(n => nameMap[n.trim()]).filter(id => id));
 
-            // 準備所有卡片組的資料
             const sets = {
                 gSSR: getIdsFromVal(findValue('卡池SSR')),
                 gSR:  getIdsFromVal(findValue('卡池SR')),
@@ -191,7 +189,6 @@
                 chibi3: getIdsFromVal(findValue('三星小人'))
             };
 
-            // 繪製「單一標籤+圖片」的群組
             const drawGroup = (label, ids, colorClass, isChibi = false) => {
                 if (!ids || ids.size === 0) return '';
                 const imgClass = isChibi ? 'chibi-img' : 'char-img';
@@ -201,18 +198,8 @@
                 return `<div class="char-group"><span class="char-label ${colorClass}">${label}</span><div class="char-list">${imgs}</div></div>`;
             };
 
-            // 繪製「灰色橫列」容器，會自動包含多個群組
-            const wrapRows = (...groups) => {
-                const validGroups = groups.filter(g => g !== '');
-                if (validGroups.length === 0) return '';
-                return `<div class="char-row-wrapper">${validGroups.join('')}</div>`;
-            };
-
-            // 處理看板角色 (顯示在標題右側)
             const leaderName = (item['看板角色'] || '').trim();
             const leaderId = nameMap[leaderName];
-            
-            // 處理天數文字 (例如：(9天))
             const daysText = item['天數'] ? ` (${item['天數']})` : '';
 
             return `
@@ -224,26 +211,22 @@
                     
                     <div class="event-main-box">
                         <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
-                        ${leaderId ? `<div class="char-group">${drawGroup('看板', new Set([leaderId]), 'lbl-leader')}</div>` : ''}
+                        ${leaderId ? `
+                            <div class="leader-box">
+                                <span class="leader-label">看板</span>
+                                <img src="${IMG_BASE_URL}${leaderId}.png" class="char-img" style="border: 2px solid var(--main-purple)">
+                            </div>` : ''}
                     </div>
                     
                     <div class="event-chars-box">
-                        ${wrapRows(
-                            drawGroup('卡池SSR', sets.gSSR, 'lbl-ssr'),
-                            drawGroup('卡池SR', sets.gSR, 'lbl-sr'),
-                            drawGroup('卡池R', sets.gR, 'lbl-r')
-                        )}
-                        
-                        ${wrapRows(
-                            drawGroup('報酬SSR', sets.rSSR, 'lbl-reward'),
-                            drawGroup('報酬SR', sets.rSR, 'lbl-reward'),
-                            drawGroup('報酬R', sets.rR, 'lbl-reward')
-                        )}
-                        
-                        ${wrapRows(
-                            drawGroup('4星', sets.chibi4, 'lbl-chibi', true),
-                            drawGroup('3星', sets.chibi3, 'lbl-chibi', true)
-                        )}
+                        ${drawGroup('卡池SSR', sets.gSSR, 'lbl-ssr')}
+                        ${drawGroup('卡池SR', sets.gSR, 'lbl-ssr')}
+                        ${drawGroup('卡池R', sets.gR, 'lbl-ssr')}
+                        ${drawGroup('報酬SSR', sets.rSSR, 'lbl-reward')}
+                        ${drawGroup('報酬SR', sets.rSR, 'lbl-reward')}
+                        ${drawGroup('報酬R', sets.rR, 'lbl-reward')}
+                        ${drawGroup('4星小人', sets.chibi4, '', true)}
+                        ${drawGroup('3星小人', sets.chibi3, '', true)}
                     </div>
                 </div>`;
         }).join('');
@@ -262,4 +245,5 @@
 </script>
 </body>
 </html>
+
 
