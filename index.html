@@ -13,55 +13,54 @@
     body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; }
     
     .header-section { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    .search-bar { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; }
+    .search-bar { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
 
-    /* 統計區 */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px; }
-    .stat-item { background: #fff; border-radius: 10px; padding: 10px; text-align: center; border: 1px solid #eee; }
-    .stat-item img { width: 45px; height: 45px; border-radius: 50%; margin-bottom: 5px; }
-
-    /* 強制單行排版容器 */
-    .event-grid { display: flex; flex-direction: column; gap: 12px; min-width: 1200px; /* 確保內容不擠壓 */ }
+    /* 活動列表容器 */
+    .event-grid { display: flex; flex-direction: column; gap: 15px; }
     
     .event-card { 
-        background: #fff; border-radius: 10px; padding: 12px 20px; 
-        border-left: 6px solid var(--main-purple);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        display: flex; align-items: center; /* 垂直居中 */
-        flex-wrap: nowrap; /* 強制不換行 */
-        gap: 25px;
+        background: #fff; border-radius: 12px; padding: 20px; 
+        border-top: 6px solid var(--main-purple);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        display: flex; flex-direction: column; gap: 12px;
     }
 
-    /* 左側：期數與日期 */
-    .event-time-box { min-width: 130px; border-right: 2px solid #f0f0f0; padding-right: 15px; text-align: center; flex-shrink: 0; }
-    .event-period { font-size: 16px; color: var(--main-purple); font-weight: bold; margin-bottom: 4px; }
-    .event-date { font-size: 12px; color: #888; white-space: nowrap; }
+    /* 第一行：期數 標題 看板 */
+    .row-top { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+    .event-period { font-size: 18px; color: var(--main-purple); font-weight: bold; background: #f0edf5; padding: 2px 10px; border-radius: 6px; }
+    .event-title { font-size: 1.4rem; font-weight: 900; color: #333; flex-grow: 1; }
+    .leader-box { display: flex; align-items: center; gap: 8px; background: #fdfafd; padding: 4px 12px; border-radius: 25px; border: 1px solid #eee; }
+    .leader-label { font-size: 11px; font-weight: bold; color: var(--main-purple); }
 
-    /* 中間：活動名稱與看板 */
-    .event-main-box { min-width: 250px; flex-shrink: 0; display: flex; align-items: center; gap: 15px; }
-    .event-title { font-size: 1.3rem; font-weight: 900; color: #333; line-height: 1.2; }
-    .leader-box { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .leader-label { font-size: 10px; font-weight: bold; color: var(--main-purple); }
+    /* 第二行：日期 */
+    .row-date { font-size: 13px; color: #888; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-top: -5px; }
 
-    /* 右側：所有卡組（橫向一條龍） */
-    .event-chars-box { 
-        display: flex; flex-direction: row; align-items: center; gap: 15px; 
-        flex-grow: 1; overflow-x: auto; /* 若螢幕不夠長可左右滑動 */
-        padding: 5px 0;
-    }
-
-    /* 單組角色樣式 */
-    .char-group { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 8px; background: #f8f8f8; flex-shrink: 0; }
-    .char-label { font-size: 11px; font-weight: bold; color: #666; white-space: nowrap; border-bottom: 2px solid #ddd; }
+    /* 第三行：角色區（標籤在圖上） */
+    .row-chars { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
     
-    /* 圖片放大 */
-    .char-list { display: flex; gap: 4px; }
-    .char-img { width: 48px; height: 48px; border-radius: 6px; border: 1px solid #ddd; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
-    .chibi-img { width: 40px; height: 40px; border-radius: 5px; }
-
-    /* 針對不同等級的標籤微調顏色 */
+    /* 單組角色容器：改為垂直排列 */
+    .char-group { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+    
+    /* 縮圖標題樣式 */
+    .char-label { 
+        font-size: 11px; font-weight: bold; padding: 2px 0; 
+        width: 100%; border-bottom: 2px solid #eee; margin-bottom: 2px;
+        white-space: nowrap;
+    }
     .lbl-ssr { color: var(--gacha-gold); border-bottom-color: var(--gacha-gold); }
     .lbl-reward { color: var(--reward-blue); border-bottom-color: var(--reward-blue); }
+    .lbl-chibi { color: #888; border-bottom-color: #ddd; }
+
+    /* 縮圖放大 */
+    .char-list { display: flex; gap: 6px; }
+    .char-img { width: 52px; height: 52px; border-radius: 8px; border: 1px solid #ddd; background: #fff; transition: transform 0.2s; }
+    .char-img:hover { transform: scale(1.1); z-index: 10; }
+    .chibi-img { width: 42px; height: 42px; border-radius: 6px; }
+
+    @media (max-width: 600px) {
+        .event-title { width: 100%; }
+        .row-chars { gap: 15px 10px; }
+    }
 </style>
 </head>
 <body>
@@ -189,13 +188,18 @@
                 chibi3: getIdsFromVal(findValue('三星小人'))
             };
 
+            // 標籤置頂的繪製工具
             const drawGroup = (label, ids, colorClass, isChibi = false) => {
                 if (!ids || ids.size === 0) return '';
                 const imgClass = isChibi ? 'chibi-img' : 'char-img';
                 const imgs = Array.from(ids).map(id => 
-                    `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/40?text=?'">`
+                    `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/50?text=?'">`
                 ).join('');
-                return `<div class="char-group"><span class="char-label ${colorClass}">${label}</span><div class="char-list">${imgs}</div></div>`;
+                return `
+                    <div class="char-group">
+                        <div class="char-label ${colorClass}">${label}</div>
+                        <div class="char-list">${imgs}</div>
+                    </div>`;
             };
 
             const leaderName = (item['看板角色'] || '').trim();
@@ -204,29 +208,29 @@
 
             return `
                 <div class="event-card">
-                    <div class="event-time-box">
+                    <div class="row-top">
                         <div class="event-period">第 ${item['期數'] || '-'} 期</div>
-                        <div class="event-date">${item['日期'] || '-'}${daysText}</div>
-                    </div>
-                    
-                    <div class="event-main-box">
                         <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
                         ${leaderId ? `
                             <div class="leader-box">
                                 <span class="leader-label">看板</span>
-                                <img src="${IMG_BASE_URL}${leaderId}.png" class="char-img" style="border: 2px solid var(--main-purple)">
+                                <img src="${IMG_BASE_URL}${leaderId}.png" class="char-img" style="width:40px; height:40px; border:2px solid var(--main-purple)">
                             </div>` : ''}
                     </div>
                     
-                    <div class="event-chars-box">
-                        ${drawGroup('卡池SSR', sets.gSSR, 'lbl-ssr')}
-                        ${drawGroup('卡池SR', sets.gSR, 'lbl-ssr')}
-                        ${drawGroup('卡池R', sets.gR, 'lbl-ssr')}
-                        ${drawGroup('報酬SSR', sets.rSSR, 'lbl-reward')}
-                        ${drawGroup('報酬SR', sets.rSR, 'lbl-reward')}
-                        ${drawGroup('報酬R', sets.rR, 'lbl-reward')}
-                        ${drawGroup('4星小人', sets.chibi4, '', true)}
-                        ${drawGroup('3星小人', sets.chibi3, '', true)}
+                    <div class="row-date">
+                        📅 ${item['日期'] || '-'} <span style="color:#bbb; margin-left:5px;">${daysText}</span>
+                    </div>
+                    
+                    <div class="row-chars">
+                        ${drawGroup('卡池 SSR', sets.gSSR, 'lbl-ssr')}
+                        ${drawGroup('卡池 SR', sets.gSR, 'lbl-ssr')}
+                        ${drawGroup('卡池 R', sets.gR, 'lbl-ssr')}
+                        ${drawGroup('報酬 SSR', sets.rSSR, 'lbl-reward')}
+                        ${drawGroup('報酬 SR', sets.rSR, 'lbl-reward')}
+                        ${drawGroup('報酬 R', sets.rR, 'lbl-reward')}
+                        ${drawGroup('4星小人', sets.chibi4, 'lbl-chibi', true)}
+                        ${drawGroup('3星小人', sets.chibi3, 'lbl-chibi', true)}
                     </div>
                 </div>`;
         }).join('');
@@ -245,5 +249,6 @@
 </script>
 </body>
 </html>
+
 
 
