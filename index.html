@@ -11,6 +11,8 @@
             --sr-silver: #a0a0a0; --r-bronze: #cd7f32; --bg-color: #fcf9f2; 
         }
         body { font-family: "PingFang TC", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; }
+        
+        /* 頂部搜尋與統計區 */
         .header-section { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 15px; }
         .stat-item { background: #fff; border-radius: 10px; padding: 8px; text-align: center; border: 1px solid #eee; }
@@ -18,26 +20,40 @@
         .stat-name { font-size: 11px; font-weight: bold; margin: 4px 0; }
         .stat-counts { font-size: 10px; line-height: 1.2; }
         
+        /* 活動卡片列表區 */
         .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
         .event-card { background: #fff; border-radius: 12px; padding: 18px; border-top: 5px solid var(--main-purple); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .event-title { font-size: 1.2rem; font-weight: bold; color: var(--main-purple); margin-bottom: 5px; }
-        .event-info { font-size: 12px; color: #888; display: flex; justify-content: space-between; margin-bottom: 12px; }
         
-        .char-row { display: flex; align-items: center; margin-top: 8px; gap: 10px; padding: 6px 10px; border-radius: 8px; background: #fafafa; }
-        .char-label { font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; color: #fff; min-width: 60px; text-align: center; }
+        /* 活動標題與看板角色排版 (新加入) */
+        .event-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px; }
+        .event-meta { flex-grow: 1; }
+        .event-title { font-size: 1.2rem; font-weight: bold; color: var(--main-purple); margin-bottom: 5px; }
+        .event-info { font-size: 12px; color: #888; }
+        
+        /* 角色列排版 (取代原本的 .char-row) */
+        .char-row-wrapper { 
+            display: flex; flex-wrap: wrap; align-items: center; gap: 15px; 
+            padding: 6px 10px; border-radius: 8px; background: #fafafa; margin-bottom: 8px;
+        }
+        /* 單一組標籤+角色的容器 (新加入) */
+        .char-group { display: flex; align-items: center; gap: 8px; }
+        
+        /* 標籤樣式微調：縮小寬度並防止文字換行 */
+        .char-label { font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; color: #fff; min-width: 50px; text-align: center; white-space: nowrap; }
         .lbl-leader { background: var(--main-purple); }
         .lbl-ssr { background: var(--gacha-gold); }
         .lbl-sr { background: var(--sr-silver); }
-        .lbl-r { background: var(--r-bronze); } /* R卡專用銅色 */
+        .lbl-r { background: var(--r-bronze); } 
         .lbl-reward { background: var(--reward-blue); }
         .lbl-chibi { background: #666; }
 
+        /* 圖片區塊 */
         .char-list { display: flex; flex-wrap: wrap; gap: 5px; }
         .char-img { width: 42px; height: 42px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
         .chibi-img { width: 35px; height: 35px; border-radius: 4px; border: 1px solid #eee; filter: brightness(1.05); }
         
         .search-bar { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; margin-bottom: 15px; }
-    </style>
+</style>
 </head>
 <body>
 
@@ -94,7 +110,7 @@
         renderEvents(data);
     }
 
-    // SSR 統計邏輯
+    // SSR 統計邏輯 (自動校正版)
     function renderStats(data) {
         let stats = {};
         Object.values(nameMap).forEach(id => {
@@ -102,9 +118,15 @@
         });
 
         data.forEach(item => {
-            // 注意：這裡必須與你試算表合併後的標題名稱完全一致（半形）
-            const gachas = splitNames(item['卡池SSR']);
-            const rewards = splitNames(item['報酬SSR']);
+            // 工具：自動尋找包含關鍵字的欄位內容
+            const findValue = (keyword) => {
+                const target = keyword.toUpperCase();
+                const key = Object.keys(item).find(k => k.toString().toUpperCase().replace(/\s+/g, '').includes(target));
+                return item[key] || "";
+            };
+
+            const gachas = splitNames(findValue('卡池SSR'));
+            const rewards = splitNames(findValue('報酬SSR'));
             
             gachas.forEach(n => {
                 const id = nameMap[n.trim()];
@@ -123,14 +145,14 @@
                 <img src="${IMG_BASE_URL}${id}.png">
                 <div class="stat-name">${idToJp[id] || id}</div>
                 <div class="stat-counts">
-                    <span style="color:var(--gacha-gold)">卡池SSR:${count.gacha}</span><br>
-                    <span style="color:var(--reward-blue)">報酬SSR:${count.reward}</span>
+                    <span style="color:var(--gacha-gold)">卡池:${count.gacha}</span> | 
+                    <span style="color:var(--reward-blue)">報酬:${count.reward}</span>
                 </div>
             </div>
         `).join('');
     }
 
-    // 活動列表渲染邏輯
+    // 活動列表渲染邏輯 (新排版版)
     function renderEvents(data) {
         const container = document.getElementById('eventList');
         if (!data || data.length === 0) {
@@ -139,65 +161,80 @@
         }
 
         container.innerHTML = data.map(item => {
-            // 工具：取得該欄位的 ID 集合 (Set 可自動去重)
-            const getIds = (fieldName) => {
-                const val = item[fieldName];
-                if (!val) return new Set();
-                return new Set(splitNames(val).map(n => nameMap[n.trim()]).filter(id => id));
+            // 工具：自動模糊比對欄位名稱並取值
+            const findValue = (keyword) => {
+                const target = keyword.toUpperCase();
+                const key = Object.keys(item).find(k => {
+                    const normalizedK = k.toString().toUpperCase().replace(/\s+/g, '');
+                    return normalizedK.includes(target);
+                });
+                return item[key] || "";
             };
 
-            // 分別抓取所有半形標題欄位
+            const getIdsFromVal = (val) => new Set(splitNames(val).map(n => nameMap[n.trim()]).filter(id => id));
+
+            // 準備所有卡片組的資料
             const sets = {
-                gSSR: getIds('卡池SSR'),
-                gSR:  getIds('卡池SR'),
-                gR:   getIds('卡池R'),
-                rSSR: getIds('報酬SSR'),
-                rSR:  getIds('報酬SR'),
-                rR:   getIds('報酬R'),
-                chibi4: getIds('四星小人'),
-                chibi3: getIds('三星小人')
+                gSSR: getIdsFromVal(findValue('卡池SSR')),
+                gSR:  getIdsFromVal(findValue('卡池SR')),
+                gR:   getIdsFromVal(findValue('卡池R')),
+                rSSR: getIdsFromVal(findValue('報酬SSR')),
+                rSR:  getIdsFromVal(findValue('報酬SR')),
+                rR:   getIdsFromVal(findValue('報酬R')),
+                chibi4: getIdsFromVal(findValue('四星小人')),
+                chibi3: getIdsFromVal(findValue('三星小人'))
             };
 
-            // 繪製單行角色的工具
-            const drawRow = (label, ids, colorClass, isChibi = false) => {
+            // 繪製「單一標籤+圖片」的群組
+            const drawGroup = (label, ids, colorClass, isChibi = false) => {
                 if (!ids || ids.size === 0) return '';
                 const imgClass = isChibi ? 'chibi-img' : 'char-img';
                 const imgs = Array.from(ids).map(id => 
                     `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/40?text=?'">`
                 ).join('');
-                
-                return `
-                    <div class="char-row">
-                        <span class="char-label ${colorClass}">${label}</span>
-                        <div class="char-list">${imgs}</div>
-                    </div>`;
+                return `<div class="char-group"><span class="char-label ${colorClass}">${label}</span><div class="char-list">${imgs}</div></div>`;
             };
 
-            // 處理看板角色
+            // 繪製「灰色橫列」容器，會自動包含多個群組
+            const wrapRows = (...groups) => {
+                const validGroups = groups.filter(g => g !== '');
+                if (validGroups.length === 0) return '';
+                return `<div class="char-row-wrapper">${validGroups.join('')}</div>`;
+            };
+
+            // 處理看板角色 (顯示在標題右側)
             const leaderName = (item['看板角色'] || '').trim();
             const leaderId = nameMap[leaderName];
-            const leaderRow = leaderId ? drawRow('看板角色', new Set([leaderId]), 'lbl-leader') : '';
+            
+            // 處理天數文字 (例如：(9天))
+            const daysText = item['天數'] ? ` (${item['天數']})` : '';
 
             return `
                 <div class="event-card">
-                    <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
-                    <div class="event-info">
-                        <span>第 ${item['期數'] || '-'} 期 | 📅 ${item['日期'] || '-'}</span>
-                        <span>${item['天數'] || ''}</span>
+                    <div class="event-header">
+                        <div class="event-meta">
+                            <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
+                            <div class="event-info">第 ${item['期數'] || '-'} 期 | 📅 ${item['日期'] || '-'}${daysText}</div>
+                        </div>
+                        ${leaderId ? `<div class="char-row-wrapper" style="margin-bottom: 0; padding: 4px 8px;">${drawGroup('看板', new Set([leaderId]), 'lbl-leader')}</div>` : ''}
                     </div>
                     
-                    ${leaderRow}
+                    ${wrapRows(
+                        drawGroup('卡池SSR', sets.gSSR, 'lbl-ssr'),
+                        drawGroup('卡池SR', sets.gSR, 'lbl-sr'),
+                        drawGroup('卡池R', sets.gR, 'lbl-r')
+                    )}
                     
-                    ${drawRow('卡池SSR', sets.gSSR, 'lbl-ssr')}
-                    ${drawRow('卡池SR', sets.gSR, 'lbl-sr')}
-                    ${drawRow('卡池R', sets.gR, 'lbl-r')}
+                    ${wrapRows(
+                        drawGroup('報酬SSR', sets.rSSR, 'lbl-reward'),
+                        drawGroup('報酬SR', sets.rSR, 'lbl-reward'),
+                        drawGroup('報酬R', sets.rR, 'lbl-reward')
+                    )}
                     
-                    ${drawRow('報酬SSR', sets.rSSR, 'lbl-reward')}
-                    ${drawRow('報酬SR', sets.rSR, 'lbl-reward')}
-                    ${drawRow('報酬R', sets.rR, 'lbl-reward')}
-                    
-                    ${drawRow('四星小人', sets.chibi4, 'lbl-chibi', true)}
-                    ${drawRow('三星小人', sets.chibi3, 'lbl-chibi', true)}
+                    ${wrapRows(
+                        drawGroup('4星小人', sets.chibi4, 'lbl-chibi', true),
+                        drawGroup('3星小人', sets.chibi3, 'lbl-chibi', true)
+                    )}
                 </div>`;
         }).join('');
     }
@@ -215,4 +252,5 @@
 </script>
 </body>
 </html>
+
 
