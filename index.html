@@ -6,53 +6,59 @@
     <title>mhyk 活動資料庫</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        :root { 
-            --main-purple: #7d6ba1; --gacha-gold: #d4af37; --reward-blue: #5b8ad2; 
-            --sr-silver: #a0a0a0; --r-bronze: #cd7f32; --bg-color: #fcf9f2; 
-        }
-        body { font-family: "PingFang TC", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; }
-        
-        /* 頂部搜尋與統計區 */
-        .header-section { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 15px; }
-        .stat-item { background: #fff; border-radius: 10px; padding: 8px; text-align: center; border: 1px solid #eee; }
-        .stat-item img { width: 40px; height: 40px; border-radius: 50%; }
-        .stat-name { font-size: 11px; font-weight: bold; margin: 4px 0; }
-        .stat-counts { font-size: 10px; line-height: 1.2; }
-        
-        /* 活動卡片列表區 */
-        .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
-        .event-card { background: #fff; border-radius: 12px; padding: 18px; border-top: 5px solid var(--main-purple); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        /* 活動標題與看板角色排版 (新加入) */
-        .event-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px; }
-        .event-meta { flex-grow: 1; }
-        .event-title { font-size: 1.2rem; font-weight: bold; color: var(--main-purple); margin-bottom: 5px; }
-        .event-info { font-size: 12px; color: #888; }
-        
-        /* 角色列排版 (取代原本的 .char-row) */
-        .char-row-wrapper { 
-            display: flex; flex-wrap: wrap; align-items: center; gap: 15px; 
-            padding: 6px 10px; border-radius: 8px; background: #fafafa; margin-bottom: 8px;
-        }
-        /* 單一組標籤+角色的容器 (新加入) */
-        .char-group { display: flex; align-items: center; gap: 8px; }
-        
-        /* 標籤樣式微調：縮小寬度並防止文字換行 */
-        .char-label { font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; color: #fff; min-width: 50px; text-align: center; white-space: nowrap; }
-        .lbl-leader { background: var(--main-purple); }
-        .lbl-ssr { background: var(--gacha-gold); }
-        .lbl-sr { background: var(--sr-silver); }
-        .lbl-r { background: var(--r-bronze); } 
-        .lbl-reward { background: var(--reward-blue); }
-        .lbl-chibi { background: #666; }
+    :root { 
+        --main-purple: #7d6ba1; --gacha-gold: #d4af37; --reward-blue: #5b8ad2; 
+        --sr-silver: #a0a0a0; --r-bronze: #cd7f32; --bg-color: #fcf9f2; 
+    }
+    body { font-family: "PingFang TC", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; }
+    
+    .header-section { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    
+    /* 統計區保持不變，或可稍微縮小 */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 15px; }
+    .stat-item { background: #fff; border-radius: 8px; padding: 5px; text-align: center; border: 1px solid #eee; font-size: 10px; }
+    .stat-item img { width: 30px; height: 30px; border-radius: 50%; }
 
-        /* 圖片區塊 */
-        .char-list { display: flex; flex-wrap: wrap; gap: 5px; }
-        .char-img { width: 42px; height: 42px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
-        .chibi-img { width: 35px; height: 35px; border-radius: 4px; border: 1px solid #eee; filter: brightness(1.05); }
-        
-        .search-bar { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; margin-bottom: 15px; }
+    /* 修改為單欄橫式 */
+    .event-grid { display: flex; flex-direction: column; gap: 10px; }
+    
+    .event-card { 
+        background: #fff; border-radius: 8px; padding: 10px 15px; 
+        border-left: 5px solid var(--main-purple); /* 改為左邊條 */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        display: flex; align-items: center; gap: 20px; /* 橫向排列 */
+    }
+
+    /* 左側：期數與日期 */
+    .event-time-box { min-width: 100px; text-align: center; border-right: 1px solid #eee; padding-right: 15px; }
+    .event-period { font-size: 12px; color: var(--main-purple); font-weight: bold; }
+    .event-date { font-size: 10px; color: #999; }
+
+    /* 中間：名稱與看板 */
+    .event-main-box { flex: 1; min-width: 200px; }
+    .event-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
+    
+    /* 右側：角色組區塊 */
+    .event-chars-box { flex: 2; display: flex; flex-direction: column; gap: 5px; }
+
+    /* 角色列：讓標籤與圖片更緊湊 */
+    .char-row-wrapper { 
+        display: flex; align-items: center; gap: 10px; 
+        padding: 4px 8px; border-radius: 6px; background: #fafafa;
+    }
+    .char-group { display: flex; align-items: center; gap: 5px; }
+    .char-label { font-size: 9px; padding: 1px 4px; min-width: 40px; }
+    .char-list img { width: 32px; height: 32px; border-radius: 4px; }
+    .chibi-img { width: 28px; height: 28px; }
+
+    /* 搜尋框 */
+    .search-bar { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; }
+
+    /* 手機版自動切換回垂直排版 */
+    @media (max-width: 768px) {
+        .event-card { flex-direction: column; align-items: flex-start; gap: 10px; border-left: none; border-top: 5px solid var(--main-purple); }
+        .event-time-box { border-right: none; text-align: left; padding: 0; }
+    }
 </style>
 </head>
 <body>
@@ -211,30 +217,34 @@
 
             return `
                 <div class="event-card">
-                    <div class="event-header">
-                        <div class="event-meta">
-                            <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
-                            <div class="event-info">第 ${item['期數'] || '-'} 期 | 📅 ${item['日期'] || '-'}${daysText}</div>
-                        </div>
-                        ${leaderId ? `<div class="char-row-wrapper" style="margin-bottom: 0; padding: 4px 8px;">${drawGroup('看板', new Set([leaderId]), 'lbl-leader')}</div>` : ''}
+                    <div class="event-time-box">
+                        <div class="event-period">第 ${item['期數'] || '-'} 期</div>
+                        <div class="event-date">${item['日期'] || '-'}${daysText}</div>
                     </div>
                     
-                    ${wrapRows(
-                        drawGroup('卡池SSR', sets.gSSR, 'lbl-ssr'),
-                        drawGroup('卡池SR', sets.gSR, 'lbl-sr'),
-                        drawGroup('卡池R', sets.gR, 'lbl-r')
-                    )}
+                    <div class="event-main-box">
+                        <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
+                        ${leaderId ? `<div class="char-group">${drawGroup('看板', new Set([leaderId]), 'lbl-leader')}</div>` : ''}
+                    </div>
                     
-                    ${wrapRows(
-                        drawGroup('報酬SSR', sets.rSSR, 'lbl-reward'),
-                        drawGroup('報酬SR', sets.rSR, 'lbl-reward'),
-                        drawGroup('報酬R', sets.rR, 'lbl-reward')
-                    )}
-                    
-                    ${wrapRows(
-                        drawGroup('4星小人', sets.chibi4, 'lbl-chibi', true),
-                        drawGroup('3星小人', sets.chibi3, 'lbl-chibi', true)
-                    )}
+                    <div class="event-chars-box">
+                        ${wrapRows(
+                            drawGroup('卡池SSR', sets.gSSR, 'lbl-ssr'),
+                            drawGroup('卡池SR', sets.gSR, 'lbl-sr'),
+                            drawGroup('卡池R', sets.gR, 'lbl-r')
+                        )}
+                        
+                        ${wrapRows(
+                            drawGroup('報酬SSR', sets.rSSR, 'lbl-reward'),
+                            drawGroup('報酬SR', sets.rSR, 'lbl-reward'),
+                            drawGroup('報酬R', sets.rR, 'lbl-reward')
+                        )}
+                        
+                        ${wrapRows(
+                            drawGroup('4星', sets.chibi4, 'lbl-chibi', true),
+                            drawGroup('3星', sets.chibi3, 'lbl-chibi', true)
+                        )}
+                    </div>
                 </div>`;
         }).join('');
     }
@@ -252,5 +262,4 @@
 </script>
 </body>
 </html>
-
 
