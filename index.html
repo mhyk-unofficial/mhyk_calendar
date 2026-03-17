@@ -100,7 +100,51 @@
 }
 
     /* 第二行：日期 */
-    .row-date { font-size: 13px; color: #888; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-top: -5px; }
+    /* --- 第二行排版調整 --- */
+
+/* 1. 讓日期列變成 Flex 容器，以便把看板放進來 */
+.row-date { 
+    display: flex;
+    align-items: flex-end; /* 底部對齊，讓日期跟圖片底部齊平 */
+    justify-content: flex-start; /* 靠左排列 */
+    gap: 30px; /* 日期跟看板之間的間距 */
+    border-bottom: 1px solid #f0f0f0; 
+    padding-bottom: 15px; /* 增加底部間距給標籤標示 */
+    margin-bottom: 5px;
+}
+
+/* 2. 日期文字樣式（保持不變，微調間距） */
+.date-text {
+    font-size: 13px; 
+    color: #888;
+    margin-bottom: 5px; /* 稍微推開一點空間對齊旁邊的圖 */
+}
+
+/* 3. 看板組容器：垂直排列 */
+.leader-group { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 6px; 
+}
+
+/* 4. 看板標籤：紫色底線樣式 */
+.lbl-leader { 
+    color: var(--main-purple); 
+    border-bottom: 2px solid var(--main-purple); 
+    font-size: 11px; 
+    font-weight: bold;
+    width: 100%;
+    white-space: nowrap;
+}
+
+/* 5. 確保看板圖案沒有多餘外框 */
+.leader-img {
+    width: 52px; 
+    height: 52px; 
+    border-radius: 8px; 
+    border: 1px solid #ddd; /* 保持跟其他縮圖一樣的細邊框即可 */
+}
 
     /* 第三行：角色區（標籤在圖上） */
     .row-chars { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
@@ -277,20 +321,21 @@
                 <div class="event-card">
                     <div class="row-top">
                         <div class="event-period">第 ${item['期數'] || '-'} 期</div>
-                        
-                        ${leaderId ? `
-                            <div class="leader-group">
-                                <div class="char-label lbl-leader">看板</div>
-                                <div class="char-list">
-                                    <img src="${IMG_BASE_URL}${leaderId}.png" class="char-img">
-                                </div>
-                            </div>` : ''}
-
                         <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
                     </div>
                     
                     <div class="row-date">
-                        📅 ${item['日期'] || '-'} <span style="color:#bbb; margin-left:5px;">${daysText}</span>
+                        <div class="date-text">
+                            📅 ${item['日期'] || '-'} <span style="color:#bbb; margin-left:5px;">${daysText}</span>
+                        </div>
+                        
+                        ${leaderId ? `
+                            <div class="leader-group">
+                                <div class="lbl-leader">看板</div>
+                                <div class="char-list">
+                                    <img src="${IMG_BASE_URL}${leaderId}.png" class="leader-img">
+                                </div>
+                            </div>` : ''}
                     </div>
                     
                     <div class="row-chars">
@@ -320,6 +365,7 @@
 </script>
 </body>
 </html>
+
 
 
 
