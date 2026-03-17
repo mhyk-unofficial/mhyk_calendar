@@ -50,8 +50,54 @@
     .row-top { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
     .event-period { font-size: 18px; color: var(--main-purple); font-weight: bold; background: #f0edf5; padding: 2px 10px; border-radius: 6px; }
     .event-title { font-size: 1.4rem; font-weight: 900; color: #333; flex-grow: 1; }
-    .leader-box { display: flex; align-items: center; gap: 8px; background: #fdfafd; padding: 4px 12px; border-radius: 25px; border: 1px solid #eee; }
-    .leader-label { font-size: 11px; font-weight: bold; color: var(--main-purple); }
+    /* --- 修改看板角色的樣式 --- */
+
+/* 1. 移除原本的膠囊外框，讓它變成跟下方一樣的群組容器 */
+.leader-group { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 6px; 
+    flex-shrink: 0; /* 防止圖片被擠壓 */
+}
+
+/* 2. 看板專用的紫色標籤顏色 */
+.lbl-leader { 
+    color: var(--main-purple); 
+    border-bottom: 2px solid var(--main-purple); 
+    font-size: 11px; 
+    font-weight: bold;
+    width: 100%;
+    white-space: nowrap;
+}
+
+/* 3. 確保第一行對齊方式為「頂部對齊」，標籤才會排在同一高度 */
+.row-top { 
+    display: flex; 
+    align-items: flex-start; /* 改為頂部對齊 */
+    gap: 15px; 
+    flex-wrap: wrap; 
+}
+
+/* 4. 微調期數的高度，讓它跟標籤對齊 */
+.event-period { 
+    margin-top: 18px; /* 稍微往下推，對齊旁邊的圖片 */
+    font-size: 18px; 
+    color: var(--main-purple); 
+    font-weight: bold; 
+    background: #f0edf5; 
+    padding: 2px 10px; 
+    border-radius: 6px; 
+}
+
+/* 5. 活動標題也要稍微往下推一點點 */
+.event-title { 
+    margin-top: 20px; 
+    font-size: 1.4rem; 
+    font-weight: 900; 
+    color: #333; 
+    flex-grow: 1; 
+}
 
     /* 第二行：日期 */
     .row-date { font-size: 13px; color: #888; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-top: -5px; }
@@ -231,12 +277,16 @@
                 <div class="event-card">
                     <div class="row-top">
                         <div class="event-period">第 ${item['期數'] || '-'} 期</div>
-                        <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
+                        
                         ${leaderId ? `
-                            <div class="leader-box">
-                                <span class="leader-label">看板</span>
-                                <img src="${IMG_BASE_URL}${leaderId}.png" class="char-img" style="width:40px; height:40px; border:2px solid var(--main-purple)">
+                            <div class="leader-group">
+                                <div class="char-label lbl-leader">看板</div>
+                                <div class="char-list">
+                                    <img src="${IMG_BASE_URL}${leaderId}.png" class="char-img">
+                                </div>
                             </div>` : ''}
+
+                        <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
                     </div>
                     
                     <div class="row-date">
@@ -270,6 +320,7 @@
 </script>
 </body>
 </html>
+
 
 
 
