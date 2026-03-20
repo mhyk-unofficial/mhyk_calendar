@@ -15,28 +15,16 @@
     .header-section { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
     .search-bar { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
 
-        /* 這裡才是控制統計區縮圖的地方 */
-.stat-item img { 
-    width: 32px;      /* 想要縮圖更小，就把這裡的 45 改成 32 */
-    height: 32px;     /* 寬高要一樣 */
-    border-radius: 50%; 
-    margin-bottom: 5px; 
-}
+    .stat-item img { 
+        width: 32px; height: 32px; border-radius: 50%; margin-bottom: 5px; 
+    }
 
-/* 順便把格子的寬度也調窄一點，看起來會更精簡 */
-.stats-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); /* 把 100px 改成 75px */
-    gap: 8px; 
-    margin-top: 15px; 
-}
+    .stats-grid { 
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; margin-top: 15px; 
+    }
 
-        .stat-counts {
-    font-size: 10px; /* 調小一點點，讓文字不會換行 */
-    line-height: 1.2;
-}
+    .stat-counts { font-size: 10px; line-height: 1.2; }
         
-    /* 活動列表容器 */
     .event-grid { display: flex; flex-direction: column; gap: 15px; }
     
     .event-card { 
@@ -46,113 +34,24 @@
         display: flex; flex-direction: column; gap: 12px;
     }
 
-    /* 第一行：期數 標題 看板 */
-    .row-top { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+    /* 第一行：標題 */
+    .row-top { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 5px; }
     .event-period { font-size: 18px; color: var(--main-purple); font-weight: bold; background: #f0edf5; padding: 2px 10px; border-radius: 6px; }
     .event-title { font-size: 1.4rem; font-weight: 900; color: #333; flex-grow: 1; }
-    /* --- 修改看板角色的樣式 --- */
 
-/* 1. 移除原本的膠囊外框，讓它變成跟下方一樣的群組容器 */
-.leader-group { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: flex-start; 
-    gap: 6px; 
-    flex-shrink: 0; /* 防止圖片被擠壓 */
-}
+    /* 第二行：日期（單純顯示文字） */
+    .row-date { 
+        border-bottom: 1px solid #f0f0f0; 
+        padding-bottom: 10px; 
+        margin-bottom: 5px;
+    }
+    .date-text { font-size: 13px; color: #888; }
 
-/* 2. 看板專用的紫色標籤顏色 */
-.lbl-leader { 
-    color: var(--main-purple); 
-    border-bottom: 2px solid var(--main-purple); 
-    font-size: 11px; 
-    font-weight: bold;
-    width: 100%;
-    white-space: nowrap;
-}
-
-/* 3. 確保第一行對齊方式為「頂部對齊」，標籤才會排在同一高度 */
-.row-top { 
-    display: flex; 
-    align-items: flex-start; /* 改為頂部對齊 */
-    gap: 15px; 
-    flex-wrap: wrap; 
-}
-
-/* 4. 微調期數的高度，讓它跟標籤對齊 */
-.event-period { 
-    margin-top: 18px; /* 稍微往下推，對齊旁邊的圖片 */
-    font-size: 18px; 
-    color: var(--main-purple); 
-    font-weight: bold; 
-    background: #f0edf5; 
-    padding: 2px 10px; 
-    border-radius: 6px; 
-}
-
-/* 5. 活動標題也要稍微往下推一點點 */
-.event-title { 
-    margin-top: 20px; 
-    font-size: 1.4rem; 
-    font-weight: 900; 
-    color: #333; 
-    flex-grow: 1; 
-}
-
-    /* 第二行：日期 */
-    /* --- 第二行排版調整 --- */
-
-/* 1. 讓日期列變成 Flex 容器，以便把看板放進來 */
-.row-date { 
-    display: flex;
-    align-items: flex-end; /* 底部對齊，讓日期跟圖片底部齊平 */
-    justify-content: flex-start; /* 靠左排列 */
-    gap: 30px; /* 日期跟看板之間的間距 */
-    border-bottom: 1px solid #f0f0f0; 
-    padding-bottom: 15px; /* 增加底部間距給標籤標示 */
-    margin-bottom: 5px;
-}
-
-/* 2. 日期文字樣式（保持不變，微調間距） */
-.date-text {
-    font-size: 13px; 
-    color: #888;
-    margin-bottom: 5px; /* 稍微推開一點空間對齊旁邊的圖 */
-}
-
-/* 3. 看板組容器：垂直排列 */
-.leader-group { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: flex-start; 
-    gap: 6px; 
-}
-
-/* 4. 看板標籤：紫色底線樣式 */
-.lbl-leader { 
-    color: var(--main-purple); 
-    border-bottom: 2px solid var(--main-purple); 
-    font-size: 11px; 
-    font-weight: bold;
-    width: 100%;
-    white-space: nowrap;
-}
-
-/* 5. 確保看板圖案沒有多餘外框 */
-.leader-img {
-    width: 52px; 
-    height: 52px; 
-    border-radius: 8px; 
-    border: 1px solid #ddd; /* 保持跟其他縮圖一樣的細邊框即可 */
-}
-
-    /* 第三行：角色區（標籤在圖上） */
+    /* 第三行：角色清單排版 */
     .row-chars { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
     
-    /* 單組角色容器：改為垂直排列 */
     .char-group { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
     
-    /* 縮圖標題樣式 */
     .char-label { 
         font-size: 11px; font-weight: bold; padding: 2px 0; 
         width: 100%; border-bottom: 2px solid #eee; margin-bottom: 2px;
@@ -161,12 +60,14 @@
     .lbl-ssr { color: var(--gacha-gold); border-bottom-color: var(--gacha-gold); }
     .lbl-reward { color: var(--reward-blue); border-bottom-color: var(--reward-blue); }
     .lbl-chibi { color: #888; border-bottom-color: #ddd; }
+    .lbl-leader { color: var(--main-purple); border-bottom-color: var(--main-purple); }
 
-    /* 縮圖放大 */
     .char-list { display: flex; gap: 6px; }
-    .char-img { width: 52px; height: 52px; border-radius: 8px; border: 1px solid #ddd; background: #fff; transition: transform 0.2s; }
-    .char-img:hover { transform: scale(1.1); z-index: 10; }
-    .chibi-img { width: 42px; height: 42px; border-radius: 6px; }
+    /* 統一所有縮圖大小為 52px */
+    .char-img, .chibi-img, .leader-img { 
+        width: 52px; height: 52px; border-radius: 8px; border: 1px solid #ddd; background: #fff; transition: transform 0.2s; 
+    }
+    .char-img:hover, .chibi-img:hover, .leader-img:hover { transform: scale(1.1); z-index: 10; }
 
     @media (max-width: 600px) {
         .event-title { width: 100%; }
@@ -185,29 +86,18 @@
 <div id="eventList" class="event-grid">載入中...</div>
 
 <script>
-    // 試算表 CSV 連結與圖片來源
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT_3vvzhb6VzcCYkVqberJIlPAeLIIWhWAIP1Oix6k3ItsBTclFSBXlXUCZIUsML82QiT-E7EScRAr6/pub?gid=1107156854&single=true&output=csv';
     const IMG_BASE_URL = 'https://mhyk-unofficial.github.io/mhyk_SSR_filter/mini_';
 
-    // 角色中日對照表
     const nameMap = {
-        "オズ": "Oz", "アーサー": "Arthur", "カイン": "Cain", "リケ": "Riquet",
-        "スノウ": "Snow", "ホワイト": "White", "ミスラ": "Mithra", "オーエン": "Owen", "ブラッドリー": "Bradley",
-        "ファウスト": "Faust", "シノ": "Shino", "ヒースクリフ": "Heathcliff", "ネロ": "Nero",
-        "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "ラスティカ": "Rustica",
-        "フィガロ": "Figaro", "ルチル": "Rutile", "レノックス": "Lennox", "ミチル": "Mitile",
-        "奧茲": "Oz", "亞瑟": "Arthur", "凱因": "Cain", "利凱": "Riquet",
-        "思諾": "Snow", "懷特": "White", "密斯拉": "Mithra", "歐文": "Owen", "布拉德利": "Bradley",
-        "浮士德": "Faust", "西諾": "Shino", "希斯克里夫": "Heathcliff", "尼洛": "Nero",
-        "夏洛克": "Shylock", "姆魯": "Murr", "庫羅耶": "Chloe", "拉斯堤卡": "Rustica",
-        "費加洛": "Figaro", "路契爾": "Rutile", "雷諾克斯": "Lennox", "米契爾": "Mitile"
+        "奧茲": "Oz", "亞瑟": "Arthur", "凱因": "Cain", "利凱": "Riquet", "思諾": "Snow", "懷特": "White", "密斯拉": "Mithra", "歐文": "Owen", "布拉德利": "Bradley", "浮士德": "Faust", "西諾": "Shino", "希斯克里夫": "Heathcliff", "尼洛": "Nero", "夏洛克": "Shylock", "姆魯": "Murr", "庫羅耶": "Chloe", "拉斯堤卡": "Rustica", "費加洛": "Figaro", "路契爾": "Rutile", "雷諾克斯": "Lennox", "米契爾": "Mitile",
+        "オズ": "Oz", "アーサー": "Arthur", "カイン": "Cain", "リケ": "Riquet", "スノウ": "Snow", "ホワイト": "White", "ミスラ": "Mithra", "オーエン": "Owen", "ブラッドリー": "Bradley", "ファウスト": "Faust", "シノ": "Shino", "ヒースクリフ": "Heathcliff", "ネロ": "Nero", "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "拉斯ティカ": "Rustica", "フィガロ": "Figaro", "ルチル": "Rutile", "レノックス": "Lennox", "ミチル": "Mitile"
     };
 
     const idToJp = { "Oz": "オズ", "Arthur": "アーサー", "Cain": "カイン", "Riquet": "リケ", "Snow": "スノウ", "White": "ホワイト", "Mithra": "ミスラ", "Owen": "オーエン", "Bradley": "ブラッドリー", "Faust": "ファウスト", "Shino": "シノ", "Heathcliff": "ヒースクリフ", "Nero": "ネロ", "Shylock": "シャイロック", "Murr": "ムル", "Chloe": "クロエ", "Rustica": "ラスティカ", "Figaro": "フィガロ", "Rutile": "ルチル", "Lennox": "レノックス", "Mitile": "ミチル" };
 
     let allEvents = [];
 
-    // 分隔字串工具
     function splitNames(str) {
         if (!str) return [];
         return str.split(/[,，\s/、\n]+/).filter(n => n.trim() !== "");
@@ -217,7 +107,6 @@
         Papa.parse(CSV_URL, {
             download: true, header: true,
             complete: function(results) {
-                // 過濾掉空行
                 allEvents = results.data.filter(row => row['活動名稱']);
                 renderPage(allEvents);
             }
@@ -229,49 +118,37 @@
         renderEvents(data);
     }
 
-    // SSR 統計邏輯 (自動校正版)
     function renderStats(data) {
         let stats = {};
-        Object.values(nameMap).forEach(id => {
-            if (!stats[id]) stats[id] = { gacha: 0, reward: 0 };
+        Object.values(idToJp).forEach(name => {
+            const id = Object.keys(idToJp).find(key => idToJp[key] === name);
+            stats[id] = { gacha: 0, reward: 0 };
         });
 
         data.forEach(item => {
-            // 工具：自動尋找包含關鍵字的欄位內容
             const findValue = (keyword) => {
                 const target = keyword.toUpperCase();
                 const key = Object.keys(item).find(k => k.toString().toUpperCase().replace(/\s+/g, '').includes(target));
                 return item[key] || "";
             };
-
             const gachas = splitNames(findValue('卡池SSR'));
             const rewards = splitNames(findValue('報酬SSR'));
-            
-            gachas.forEach(n => {
-                const id = nameMap[n.trim()];
-                if (id) stats[id].gacha++;
-            });
-            rewards.forEach(n => {
-                const id = nameMap[n.trim()];
-                if (id) stats[id].reward++;
-            });
+            gachas.forEach(n => { const id = nameMap[n.trim()]; if (id) stats[id].gacha++; });
+            rewards.forEach(n => { const id = nameMap[n.trim()]; if (id) stats[id].reward++; });
         });
 
         const sorted = Object.entries(stats).sort((a, b) => (b[1].gacha + b[1].reward) - (a[1].gacha + a[1].reward));
-
         document.getElementById('statsGrid').innerHTML = sorted.map(([id, count]) => `
             <div class="stat-item">
                 <img src="${IMG_BASE_URL}${id}.png">
-                <div class="stat-name">${idToJp[id] || id}</div>
+                <div class="stat-name">${idToJp[id]}</div>
                 <div class="stat-counts">
-                    <span style="color:var(--gacha-gold)">卡池:${count.gacha}</span> | 
-                    <span style="color:var(--reward-blue)">報酬:${count.reward}</span>
+                    <span style="color:var(--gacha-gold)">池:${count.gacha}</span> | <span style="color:var(--reward-blue)">賞:${count.reward}</span>
                 </div>
             </div>
         `).join('');
     }
 
-    // 活動列表渲染邏輯 (新排版版)
     function renderEvents(data) {
         const container = document.getElementById('eventList');
         if (!data || data.length === 0) {
@@ -299,18 +176,13 @@
                 chibi3: getIdsFromVal(findValue('三星小人'))
             };
 
-            // 標籤置頂的繪製工具
             const drawGroup = (label, ids, colorClass, isChibi = false) => {
                 if (!ids || ids.size === 0) return '';
                 const imgClass = isChibi ? 'chibi-img' : 'char-img';
                 const imgs = Array.from(ids).map(id => 
-                    `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id] || id}" onerror="this.src='https://via.placeholder.com/50?text=?'">`
+                    `<img src="${IMG_BASE_URL}${id}.png" class="${imgClass}" title="${idToJp[id]}" onerror="this.src='https://via.placeholder.com/50?text=?'">`
                 ).join('');
-                return `
-                    <div class="char-group">
-                        <div class="char-label ${colorClass}">${label}</div>
-                        <div class="char-list">${imgs}</div>
-                    </div>`;
+                return `<div class="char-group"><div class="char-label ${colorClass}">${label}</div><div class="char-list">${imgs}</div></div>`;
             };
 
             const leaderName = (item['看板角色'] || '').trim();
@@ -325,20 +197,18 @@
                     </div>
                     
                     <div class="row-date">
-                        <div class="date-text">
-                            📅 ${item['日期'] || '-'} <span style="color:#bbb; margin-left:5px;">${daysText}</span>
-                        </div>
-                        
+                        <div class="date-text">📅 ${item['日期'] || '-'} <span>${daysText}</span></div>
+                    </div>
+                    
+                    <div class="row-chars">
                         ${leaderId ? `
-                            <div class="leader-group">
-                                <div class="lbl-leader">看板</div>
+                            <div class="char-group">
+                                <div class="char-label lbl-leader">看板</div>
                                 <div class="char-list">
                                     <img src="${IMG_BASE_URL}${leaderId}.png" class="leader-img">
                                 </div>
                             </div>` : ''}
-                    </div>
-                    
-                    <div class="row-chars">
+
                         ${drawGroup('卡池 SSR', sets.gSSR, 'lbl-ssr')}
                         ${drawGroup('卡池 SR', sets.gSR, 'lbl-ssr')}
                         ${drawGroup('卡池 R', sets.gR, 'lbl-ssr')}
@@ -352,7 +222,6 @@
         }).join('');
     }
 
-    // 搜尋功能
     function handleSearch() {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const filtered = allEvents.filter(ev => 
@@ -365,11 +234,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
