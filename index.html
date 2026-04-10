@@ -15,15 +15,13 @@
     .header-section { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
     .search-bar { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
 
-    .stat-item img { 
-        width: 32px; height: 32px; border-radius: 50%; margin-bottom: 5px; 
+    /* 篩選選單樣式 */
+    .filter-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+    .filter-controls select { 
+        flex: 1; min-width: 120px; padding: 10px; border-radius: 8px; border: 2px solid #eee; 
+        background: #fff; font-size: 14px; color: #555; cursor: pointer; 
     }
-
-    .stats-grid { 
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; margin-top: 15px; 
-    }
-
-    .stat-counts { font-size: 10px; line-height: 1.2; }
+    .filter-controls select:focus { border-color: var(--main-purple); outline: none; }
         
     .event-grid { display: flex; flex-direction: column; gap: 15px; }
     
@@ -34,24 +32,15 @@
         display: flex; flex-direction: column; gap: 12px;
     }
 
-    /* 第一行：標題 */
     .row-top { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 5px; }
     .event-period { font-size: 18px; color: var(--main-purple); font-weight: bold; background: #f0edf5; padding: 2px 10px; border-radius: 6px; }
     .event-title { font-size: 1.4rem; font-weight: 900; color: #333; flex-grow: 1; }
 
-    /* 第二行：日期（單純顯示文字） */
-    .row-date { 
-        border-bottom: 1px solid #f0f0f0; 
-        padding-bottom: 10px; 
-        margin-bottom: 5px;
-    }
+    .row-date { border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 5px; }
     .date-text { font-size: 13px; color: #888; }
 
-    /* 第三行：角色清單排版 */
     .row-chars { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
-    
     .char-group { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
-    
     .char-label { 
         font-size: 11px; font-weight: bold; padding: 2px 0; 
         width: 100%; border-bottom: 2px solid #eee; margin-bottom: 2px;
@@ -63,7 +52,6 @@
     .lbl-leader { color: var(--main-purple); border-bottom-color: var(--main-purple); }
 
     .char-list { display: flex; gap: 6px; }
-    /* 統一所有縮圖大小為 52px */
     .char-img, .chibi-img, .leader-img { 
         width: 52px; height: 52px; border-radius: 8px; border: 1px solid #ddd; background: #fff; transition: transform 0.2s; 
     }
@@ -78,9 +66,46 @@
 <body>
 
 <div class="header-section">
-    <input type="text" id="searchInput" class="search-bar" placeholder="🔍 搜尋活動或角色..." oninput="handleSearch()">
-    <h3>📊 出卡統計 (SSR)</h3>
-    <div id="statsGrid" class="stats-grid">讀取中...</div>
+    <input type="text" id="searchInput" class="search-bar" placeholder="🔍 搜尋活動名稱或角色..." oninput="handleFilter()">
+    
+    <div class="filter-controls">
+        <select id="yearFilter" onchange="handleFilter()">
+            <option value="">📅 所有年份</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+        </select>
+
+        <select id="rarityFilter" onchange="handleFilter()">
+            <option value="">✨ 所有性質</option>
+            <option value="常駐">常駐</option>
+            <option value="限定">限定</option>
+        </select>
+
+        <select id="seriesFilter" onchange="handleFilter()">
+            <option value="">🏆 系列活動</option>
+            <option value="祝祭">祝祭</option>
+            <option value="訓練">訓練</option>
+            <option value="場所">場所</option>
+            <option value="依賴">依賴</option>
+            <option value="專門店">專門店</option>
+            <option value="周年">周年</option>
+        </select>
+
+        <select id="seasonFilter" onchange="handleFilter()">
+            <option value="">🎁 季節/節日</option>
+            <option value="情人節">情人節/白情</option>
+            <option value="愚人節">愚人節</option>
+            <option value="婚活">婚活</option>
+            <option value="七夕">七夕</option>
+            <option value="萬聖節">萬聖節</option>
+            <option value="聖誕節">聖誕節</option>
+        </select>
+    </div>
 </div>
 
 <div id="eventList" class="event-grid">載入中...</div>
@@ -91,7 +116,7 @@
 
     const nameMap = {
         "奧茲": "Oz", "亞瑟": "Arthur", "凱因": "Cain", "利凱": "Riquet", "思諾": "Snow", "懷特": "White", "密斯拉": "Mithra", "歐文": "Owen", "布拉德利": "Bradley", "浮士德": "Faust", "西諾": "Shino", "希斯克里夫": "Heathcliff", "尼洛": "Nero", "夏洛克": "Shylock", "姆魯": "Murr", "庫羅耶": "Chloe", "拉斯堤卡": "Rustica", "費加洛": "Figaro", "路契爾": "Rutile", "雷諾克斯": "Lennox", "米契爾": "Mitile",
-        "オズ": "Oz", "アーサー": "Arthur", "カイン": "Cain", "リケ": "Riquet", "スノウ": "Snow", "ホワイト": "White", "ミスラ": "Mithra", "オーエン": "Owen", "ブラッドリー": "Bradley", "ファウスト": "Faust", "シノ": "Shino", "ヒースクリフ": "Heathcliff", "ネロ": "Nero", "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "拉斯ティカ": "Rustica", "フィガロ": "Figaro", "ルチル": "Rutile", "レノックス": "Lennox", "ミチル": "Mitile"
+        "オズ": "Oz", "アーサー": "Arthur", "カイン": "Cain", "リケ": "Riquet", "スノウ": "Snow", "ホワイト": "White", "ミスラ": "Mithra", "オーエン": "Owen", "ブラッドリー": "Bradley", "ファウスト": "Faust", "シノ": "Shino", "希斯克里夫": "Heathcliff", "ネロ": "Nero", "シャイロック": "Shylock", "ムル": "Murr", "クロエ": "Chloe", "拉斯ティカ": "Rustica", "フィガロ": "Figaro", "ルチル": "Rutile", "レノックス": "Lennox", "ミチル": "Mitile"
     };
 
     const idToJp = { "Oz": "オズ", "Arthur": "アーサー", "Cain": "カイン", "Riquet": "リケ", "Snow": "スノウ", "White": "ホワイト", "Mithra": "ミスラ", "Owen": "オーエン", "Bradley": "ブラッドリー", "Faust": "ファウスト", "Shino": "シノ", "Heathcliff": "ヒースクリフ", "Nero": "ネロ", "Shylock": "シャイロック", "Murr": "ムル", "Chloe": "クロエ", "Rustica": "ラスティカ", "Figaro": "フィガロ", "Rutile": "ルチル", "Lennox": "レノックス", "Mitile": "ミチル" };
@@ -114,39 +139,29 @@
     }
 
     function renderPage(data) {
-        renderStats(data);
         renderEvents(data);
     }
 
-    function renderStats(data) {
-        let stats = {};
-        Object.values(idToJp).forEach(name => {
-            const id = Object.keys(idToJp).find(key => idToJp[key] === name);
-            stats[id] = { gacha: 0, reward: 0 };
+    function handleFilter() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const yearTerm = document.getElementById('yearFilter').value;
+        const rarityTerm = document.getElementById('rarityFilter').value;
+        const seriesTerm = document.getElementById('seriesFilter').value;
+        const seasonTerm = document.getElementById('seasonFilter').value;
+
+        const filtered = allEvents.filter(ev => {
+            const matchSearch = Object.values(ev).some(v => v.toString().toLowerCase().includes(searchTerm));
+            
+            // 這些欄位名稱 '年份', '性質', '系列', '主題' 需與試算表標頭對齊
+            const matchYear = yearTerm === "" || (ev['年份'] && ev['年份'].includes(yearTerm));
+            const matchRarity = rarityTerm === "" || (ev['性質'] && ev['性質'].includes(rarityTerm));
+            const matchSeries = seriesTerm === "" || (ev['系列'] && ev['系列'].includes(seriesTerm));
+            const matchSeason = seasonTerm === "" || (ev['主題'] && ev['主題'].includes(seasonTerm));
+
+            return matchSearch && matchYear && matchRarity && matchSeries && matchSeason;
         });
 
-        data.forEach(item => {
-            const findValue = (keyword) => {
-                const target = keyword.toUpperCase();
-                const key = Object.keys(item).find(k => k.toString().toUpperCase().replace(/\s+/g, '').includes(target));
-                return item[key] || "";
-            };
-            const gachas = splitNames(findValue('卡池SSR'));
-            const rewards = splitNames(findValue('報酬SSR'));
-            gachas.forEach(n => { const id = nameMap[n.trim()]; if (id) stats[id].gacha++; });
-            rewards.forEach(n => { const id = nameMap[n.trim()]; if (id) stats[id].reward++; });
-        });
-
-        const sorted = Object.entries(stats).sort((a, b) => (b[1].gacha + b[1].reward) - (a[1].gacha + a[1].reward));
-        document.getElementById('statsGrid').innerHTML = sorted.map(([id, count]) => `
-            <div class="stat-item">
-                <img src="${IMG_BASE_URL}${id}.png">
-                <div class="stat-name">${idToJp[id]}</div>
-                <div class="stat-counts">
-                    <span style="color:var(--gacha-gold)">卡池:${count.gacha}</span> | <span style="color:var(--reward-blue)">報酬:${count.reward}</span>
-                </div>
-            </div>
-        `).join('');
+        renderEvents(filtered);
     }
 
     function renderEvents(data) {
@@ -195,11 +210,9 @@
                         <div class="event-period">第 ${item['期數'] || '-'} 期</div>
                         <div class="event-title">${item['活動名稱'] || '未命名活動'}</div>
                     </div>
-                    
                     <div class="row-date">
                         <div class="date-text">📅 ${item['日期'] || '-'} <span>${daysText}</span></div>
                     </div>
-                    
                     <div class="row-chars">
                         ${leaderId ? `
                             <div class="char-group">
@@ -208,7 +221,6 @@
                                     <img src="${IMG_BASE_URL}${leaderId}.png" class="leader-img">
                                 </div>
                             </div>` : ''}
-
                         ${drawGroup('卡池 SSR', sets.gSSR, 'lbl-ssr')}
                         ${drawGroup('卡池 SR', sets.gSR, 'lbl-ssr')}
                         ${drawGroup('卡池 R', sets.gR, 'lbl-ssr')}
@@ -220,14 +232,6 @@
                     </div>
                 </div>`;
         }).join('');
-    }
-
-    function handleSearch() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = allEvents.filter(ev => 
-            Object.values(ev).some(v => v.toString().toLowerCase().includes(term))
-        );
-        renderPage(filtered);
     }
 
     window.onload = init;
